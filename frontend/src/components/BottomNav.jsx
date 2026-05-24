@@ -6,6 +6,7 @@ const navItems = [
   { path: '/dashboard',   label: 'Home',    icon: '⌂'  },
   { path: '/stock',       label: 'Stock',   icon: '▦'  },
   { path: '/billing',     label: 'Bill',    icon: '⊕'  },
+  { path: '/bills',       label: 'Bills',   icon: '☰'  },
   { path: '/goldloan',    label: 'Loan',    icon: '◈'  },
   { path: '/weightcheck', label: 'Check',   icon: '⊜'  },
 ]
@@ -65,7 +66,7 @@ function BottomNav() {
               transition     : 'all 0.2s'
             }}>
               <span style={{
-                fontSize  : '18px',
+                fontSize  : '16px',
                 color     : isActive ? '#f59e0b' : theme.textMuted,
                 transition: 'all 0.2s'
               }}>
@@ -73,7 +74,7 @@ function BottomNav() {
               </span>
             </div>
             <span style={{
-              fontSize  : '10px',
+              fontSize  : '9px',
               fontWeight: isActive ? '700' : '500',
               color     : isActive ? '#f59e0b' : theme.textMuted,
               transition: 'all 0.2s'
