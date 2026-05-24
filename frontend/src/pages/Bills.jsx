@@ -1,10 +1,13 @@
+import useIsMobile       from '../hooks/useIsMobile'
+import useResponsiveGrid from '../hooks/useResponsiveGrid'
 import { useTheme } from '../context/ThemeContext'
 import { getTheme } from '../context/theme'
 import { useState, useEffect } from 'react'
 import { supabase } from '../supabase'
 
 function Bills() {
-
+  const isMobile = useIsMobile()
+  const grids    = useResponsiveGrid()
   const today = new Date().toISOString().split('T')[0]
   const { isDark } = useTheme()
   const theme      = getTheme(isDark)
@@ -18,9 +21,11 @@ function Bills() {
   const styles = {
   pageHeader: {
     display       : 'flex',
-    justifyContent: 'space-between',
-    alignItems    : 'flex-start',
-    marginBottom  : '24px'
+  flexDirection : isMobile ? 'column' : 'row',
+  justifyContent: 'space-between',
+  alignItems    : isMobile ? 'flex-start' : 'flex-end',
+  gap           : isMobile ? '12px' : '0',
+  marginBottom  : '24px'
   },
   pageTitle: {
     fontSize  : '24px',
@@ -33,9 +38,10 @@ function Bills() {
     marginTop: '4px'
   },
   filterSection: {
-    display   : 'flex',
-    alignItems: 'flex-end',
-    gap       : '12px'
+    display      : 'flex',
+  flexDirection: isMobile ? 'column' : 'row',
+  alignItems   : isMobile ? 'flex-start' : 'flex-end',
+  gap          : '12px'
   },
   filterGroup: {
     display      : 'flex',
@@ -101,11 +107,11 @@ function Bills() {
   },
   tableCard: {
     backgroundColor: theme.cardBg,
-    borderRadius   : '12px',
-    padding        : '24px',
-    boxShadow      : theme.shadow,
-    border         : `1px solid ${theme.border}`,
-    overflowX      : 'auto'
+  borderRadius   : '12px',
+  padding        : isMobile ? '16px 12px' : '24px',
+  boxShadow      : theme.shadow,
+  border         : `1px solid ${theme.border}`,
+  overflowX      : 'auto'
   },
   table: {
     width         : '100%',
@@ -197,12 +203,12 @@ function Bills() {
   },
   billCard: {
     backgroundColor: theme.cardBg,
-    borderRadius   : '12px',
-    padding        : '40px',
-    boxShadow      : theme.shadow,
-    border         : `1px solid ${theme.border}`,
-    maxWidth       : '800px',
-    margin         : '0 auto'
+  borderRadius   : '12px',
+  padding        : isMobile ? '16px' : '40px',
+  boxShadow      : theme.shadow,
+  border         : `1px solid ${theme.border}`,
+  maxWidth       : '800px',
+  margin         : '0 auto'
   },
   billHeader: {
     display        : 'flex',
@@ -264,7 +270,7 @@ function Bills() {
     marginBottom  : '24px'
   },
   summaryBox: {
-    width: '280px'
+     width: isMobile ? '100%' : '280px'
   },
   summaryRow: {
     display        : 'flex',

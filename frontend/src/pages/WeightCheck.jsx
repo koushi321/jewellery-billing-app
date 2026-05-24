@@ -1,10 +1,13 @@
+import useIsMobile       from '../hooks/useIsMobile'
+import useResponsiveGrid from '../hooks/useResponsiveGrid'
 import { useTheme } from '../context/ThemeContext'
 import { getTheme } from '../context/theme'
 import { useState, useEffect } from 'react'
 import { supabase } from '../supabase'
 
 function WeightCheck() {
-
+  const isMobile = useIsMobile()
+  const grids    = useResponsiveGrid()
   const today = new Date().toISOString().split('T')[0]
   const { isDark } = useTheme()
   const theme      = getTheme(isDark)
@@ -168,9 +171,11 @@ function WeightCheck() {
   const styles = {
   pageHeader: {
     display       : 'flex',
-    justifyContent: 'space-between',
-    alignItems    : 'flex-start',
-    marginBottom  : '24px'
+  flexDirection : isMobile ? 'column' : 'row',
+  justifyContent: 'space-between',
+  alignItems    : isMobile ? 'flex-start' : 'flex-end',
+  gap           : isMobile ? '12px' : '0',
+  marginBottom  : '24px'
   },
   pageTitle: {
     fontSize  : '24px',
@@ -231,14 +236,15 @@ function WeightCheck() {
     marginBottom : '-2px'
   },
   summaryBar: {
-    display        : 'flex',
-    gap            : '24px',
-    backgroundColor: theme.cardBg,
-    borderRadius   : '12px',
-    padding        : '16px 24px',
-    marginBottom   : '16px',
-    boxShadow      : theme.shadow,
-    border         : `1px solid ${theme.border}`
+    display        : 'grid',
+  gridTemplateColumns: isMobile ? 'repeat(3, 1fr)' : 'auto auto auto',
+  gap            : '16px',
+  backgroundColor: theme.cardBg,
+  borderRadius   : '12px',
+  padding        : isMobile ? '12px' : '16px 24px',
+  marginBottom   : '16px',
+  boxShadow      : theme.shadow,
+  border         : `1px solid ${theme.border}`
   },
   summaryItem: {
     display      : 'flex',
@@ -256,12 +262,12 @@ function WeightCheck() {
   },
   card: {
     backgroundColor: theme.cardBg,
-    borderRadius   : '12px',
-    padding        : '24px',
-    marginBottom   : '24px',
-    boxShadow      : theme.shadow,
-    border         : `1px solid ${theme.border}`,
-    overflowX      : 'auto'
+  borderRadius   : '12px',
+  padding        : isMobile ? '16px 12px' : '24px',
+  marginBottom   : '24px',
+  boxShadow      : theme.shadow,
+  border         : `1px solid ${theme.border}`,
+  overflowX      : 'auto'
   },
   cardTitle: {
     fontSize    : '16px',
@@ -299,24 +305,24 @@ function WeightCheck() {
     color   : theme.textPrimary
   },
   weightInput: {
-    padding        : '8px 10px',
-    borderRadius   : '6px',
-    border         : `1px solid ${theme.borderInput}`,
-    fontSize       : '14px',
-    width          : '120px',
-    outline        : 'none',
-    backgroundColor: theme.inputBg,
-    color          : theme.textPrimary
+   padding        : '8px 10px',
+  borderRadius   : '6px',
+  border         : `1px solid ${theme.borderInput}`,
+  fontSize       : '14px',
+  width          : isMobile ? '90px' : '120px',
+  outline        : 'none',
+  backgroundColor: theme.inputBg,
+  color          : theme.textPrimary
   },
   notesInput: {
     padding        : '8px 10px',
-    borderRadius   : '6px',
-    border         : `1px solid ${theme.borderInput}`,
-    fontSize       : '13px',
-    width          : '120px',
-    outline        : 'none',
-    backgroundColor: theme.inputBg,
-    color          : theme.textPrimary
+  borderRadius   : '6px',
+  border         : `1px solid ${theme.borderInput}`,
+  fontSize       : '13px',
+  width          : isMobile ? '80px' : '120px',
+  outline        : 'none',
+  backgroundColor: theme.inputBg,
+  color          : theme.textPrimary
   },
   statusBadge: {
     color        : 'white',

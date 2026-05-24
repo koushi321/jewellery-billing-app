@@ -1,9 +1,13 @@
+import useIsMobile       from '../hooks/useIsMobile'
+import useResponsiveGrid from '../hooks/useResponsiveGrid'
 import { useTheme } from '../context/ThemeContext'
 import { getTheme } from '../context/theme'
 import { useState, useEffect } from 'react'
 import { supabase } from '../supabase'
 
 function GoldLoan() {
+  const isMobile = useIsMobile()
+  const grids    = useResponsiveGrid()
   const { isDark } = useTheme()
   const theme      = getTheme(isDark)
   const [activeTab, setActiveTab]       = useState('loans')
@@ -593,9 +597,11 @@ function GoldLoan() {
   const styles = {
   pageHeader: {
     display       : 'flex',
-    justifyContent: 'space-between',
-    alignItems    : 'center',
-    marginBottom  : '24px'
+  flexDirection : isMobile ? 'column' : 'row',
+  justifyContent: 'space-between',
+  alignItems    : isMobile ? 'flex-start' : 'center',
+  gap           : isMobile ? '12px' : '0',
+  marginBottom  : '24px'
   },
   pageTitle: {
     fontSize  : '24px',
@@ -658,11 +664,11 @@ function GoldLoan() {
   },
   formCard: {
     backgroundColor: theme.cardBg,
-    borderRadius   : '12px',
-    padding        : '24px',
-    marginBottom   : '24px',
-    boxShadow      : theme.shadow,
-    border         : `1px solid ${theme.border}`
+  borderRadius   : '12px',
+  padding        : isMobile ? '16px 12px' : '24px',
+  marginBottom   : '24px',
+  boxShadow      : theme.shadow,
+  border         : `1px solid ${theme.border}`
   },
   formTitle: {
     fontSize    : '16px',
@@ -671,10 +677,8 @@ function GoldLoan() {
     marginBottom: '16px'
   },
   formGrid: {
-    display             : 'grid',
-    gridTemplateColumns : 'repeat(3, 1fr)',
-    gap                 : '16px',
-    marginBottom        : '16px'
+     ...grids.grid3,
+  marginBottom: '16px'
   },
   inputGroup: {
     display      : 'flex',
@@ -727,13 +731,13 @@ function GoldLoan() {
     cursor         : 'pointer'
   },
   tableCard: {
-    backgroundColor: theme.cardBg,
-    borderRadius   : '12px',
-    padding        : '24px',
-    marginBottom   : '24px',
-    boxShadow      : theme.shadow,
-    border         : `1px solid ${theme.border}`,
-    overflowX      : 'auto'
+     backgroundColor: theme.cardBg,
+  borderRadius   : '12px',
+  padding        : isMobile ? '16px 12px' : '24px',
+  marginBottom   : '24px',
+  boxShadow      : theme.shadow,
+  border         : `1px solid ${theme.border}`,
+  overflowX      : 'auto'
   },
   table: {
     width         : '100%',
@@ -868,12 +872,12 @@ function GoldLoan() {
     marginBottom   : '24px'
   },
   loanCard: {
-    backgroundColor: theme.cardBg,
-    borderRadius   : '12px',
-    padding        : '40px',
-    boxShadow      : theme.shadow,
-    border         : `1px solid ${theme.border}`,
-    marginBottom   : '24px'
+     backgroundColor: theme.cardBg,
+  borderRadius   : '12px',
+  padding        : isMobile ? '16px' : '40px',
+  boxShadow      : theme.shadow,
+  border         : `1px solid ${theme.border}`,
+  marginBottom   : '24px'
   },
   loanCardHeader: {
     display        : 'flex',
@@ -904,9 +908,9 @@ function GoldLoan() {
     margin   : '20px 0'
   },
   loanDetailGrid: {
-    display             : 'grid',
-    gridTemplateColumns : '1fr 1fr',
-    gap                 : '24px'
+     display             : 'grid',
+  gridTemplateColumns : isMobile ? '1fr' : '1fr 1fr',
+  gap                 : isMobile ? '16px' : '24px'
   },
   detailSection: {
     display      : 'flex',
@@ -936,13 +940,14 @@ function GoldLoan() {
   },
   dateRangeBox: {
     display        : 'flex',
-    alignItems     : 'center',
-    gap            : '16px',
-    backgroundColor: theme.headerBg,
-    borderRadius   : '10px',
-    padding        : '16px 24px',
-    marginBottom   : '16px',
-    border         : `1px solid ${theme.border}`
+  flexDirection  : isMobile ? 'column' : 'row',
+  alignItems     : isMobile ? 'flex-start' : 'center',
+  gap            : '16px',
+  backgroundColor: theme.headerBg,
+  borderRadius   : '10px',
+  padding        : isMobile ? '12px' : '16px 24px',
+  marginBottom   : '16px',
+  border         : `1px solid ${theme.border}`
   },
   dateRangeItem: {
     display      : 'flex',
@@ -965,9 +970,9 @@ function GoldLoan() {
   },
   calcGrid: {
     display             : 'grid',
-    gridTemplateColumns : 'repeat(3, 1fr)',
-    gap                 : '16px',
-    margin              : '16px 0'
+  gridTemplateColumns : isMobile ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)',
+  gap                 : '16px',
+  margin              : '16px 0'
   },
   calcCard: {
     backgroundColor: theme.headerBg,
@@ -1089,10 +1094,8 @@ function GoldLoan() {
     marginBottom: '16px'
   },
   paymentGrid: {
-    display             : 'grid',
-    gridTemplateColumns : 'repeat(3, 1fr)',
-    gap                 : '16px',
-    marginBottom        : '16px'
+     ...grids.grid3,
+  marginBottom: '16px'
   },
   paymentActions: {
     display: 'flex',

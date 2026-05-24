@@ -1,3 +1,5 @@
+import useIsMobile       from '../hooks/useIsMobile'
+import useResponsiveGrid from '../hooks/useResponsiveGrid'
 import { useTheme } from '../context/ThemeContext'
 import { getTheme } from '../context/theme'
 import { useState, useEffect } from 'react'
@@ -6,6 +8,8 @@ import { supabase } from '../supabase'
 function Billing() {
 
   // ── STATE ──────────────────────────────────────────────
+  const isMobile = useIsMobile()
+  const grids    = useResponsiveGrid()
   const { isDark } = useTheme()
   const theme      = getTheme(isDark)
   const [stockItems, setStockItems]       = useState([])
@@ -454,11 +458,11 @@ function Billing() {
   },
   card: {
     backgroundColor: theme.cardBg,
-    borderRadius   : '12px',
-    padding        : '24px',
-    marginBottom   : '24px',
-    boxShadow      : theme.shadow,
-    border         : `1px solid ${theme.border}`
+  borderRadius   : '12px',
+  padding        : isMobile ? '16px 12px' : '24px',
+  marginBottom   : '24px',
+  boxShadow      : theme.shadow,
+  border         : `1px solid ${theme.border}`
   },
   cardTitle: {
     fontSize    : '16px',
@@ -467,15 +471,11 @@ function Billing() {
     marginBottom: '16px'
   },
   formGrid2: {
-    display             : 'grid',
-    gridTemplateColumns : 'repeat(2, 1fr)',
-    gap                 : '16px'
+    ...grids.grid2
   },
   formGrid3: {
-    display             : 'grid',
-    gridTemplateColumns : 'repeat(3, 1fr)',
-    gap                 : '16px',
-    marginBottom        : '16px'
+   ...grids.grid3,
+  marginBottom: '16px'
   },
   inputGroup: {
     display      : 'flex',
@@ -506,9 +506,9 @@ function Billing() {
     marginBottom   : '16px'
   },
   previewGrid: {
-    display             : 'grid',
-    gridTemplateColumns : 'repeat(4, 1fr)',
-    gap                 : '12px'
+     display             : 'grid',
+  gridTemplateColumns : isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
+    gap                : '12px'
   },
   previewItem: {
     display      : 'flex',
@@ -617,9 +617,9 @@ function Billing() {
     marginBottom  : '16px'
   },
   summaryBox: {
-    width    : '320px',
-    borderTop: `2px solid ${theme.border}`,
-    paddingTop: '16px'
+   width    : isMobile ? '100%' : '320px',
+  borderTop: `2px solid ${theme.border}`,
+  paddingTop: '16px'
   },
   summaryRow: {
     display        : 'flex',
@@ -706,14 +706,14 @@ function Billing() {
     marginTop   : '8px'
   },
   billCard: {
-    backgroundColor: theme.cardBg,
-    borderRadius   : '12px',
-    padding        : '40px',
-    boxShadow      : theme.shadow,
-    border         : `1px solid ${theme.border}`,
-    marginBottom   : '20px',
-    maxWidth       : '860px',
-    margin         : '0 auto 20px auto'
+     backgroundColor: theme.cardBg,
+  borderRadius   : '12px',
+  padding        : isMobile ? '16px' : '40px',
+  boxShadow      : theme.shadow,
+  border         : `1px solid ${theme.border}`,
+  marginBottom   : '20px',
+  maxWidth       : '860px',
+  margin         : '0 auto 20px auto'
   },
   billHeader: {
     display        : 'flex',

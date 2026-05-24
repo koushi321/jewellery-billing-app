@@ -1,3 +1,5 @@
+import useIsMobile        from '../hooks/useIsMobile'
+import useResponsiveGrid  from '../hooks/useResponsiveGrid'
 import { useTheme } from '../context/ThemeContext'
 import { getTheme } from '../context/theme'
 import { useState, useEffect } from 'react'
@@ -5,6 +7,8 @@ import { supabase } from '../supabase'
 
 function Dashboard() {
 
+  const isMobile = useIsMobile()
+  const grids    = useResponsiveGrid()
   const today = new Date().toISOString().split('T')[0]
   const { isDark } = useTheme()
   const theme      = getTheme(isDark)
@@ -168,11 +172,9 @@ function Dashboard() {
     color          : theme.textPrimary
   },
   statsGrid: {
-    display             : 'grid',
-    gridTemplateColumns : 'repeat(4, 1fr)',
-    gap                 : '16px',
-    marginBottom        : '24px'
-  },
+  ...grids.grid4,
+  marginBottom: '24px'
+},
   statCard: {
     backgroundColor: theme.cardBg,
     borderRadius   : '12px',
@@ -292,7 +294,9 @@ function Dashboard() {
     padding  : '40px',
     color    : theme.textSecondary,
     fontSize : '16px'
-  }
+  },formGrid2: {
+  ...grids.grid2
+}
 }
 
   

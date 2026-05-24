@@ -1,10 +1,13 @@
+import useIsMobile       from '../hooks/useIsMobile'
+import useResponsiveGrid from '../hooks/useResponsiveGrid'
 import { useTheme } from '../context/ThemeContext'
 import { getTheme } from '../context/theme'
 import { useState, useEffect } from 'react'
 import { supabase } from '../supabase'
 
 function Stock() {
-
+  const isMobile = useIsMobile()
+  const grids    = useResponsiveGrid()
   const { isDark } = useTheme()
   const theme      = getTheme(isDark)
   const [items, setItems]       = useState([])
@@ -222,12 +225,14 @@ function Stock() {
     fontSize       : '14px'
   },
   formCard: {
-    backgroundColor: theme.cardBg,
-    borderRadius   : '12px',
-    padding        : '24px',
-    marginBottom   : '24px',
-    boxShadow      : theme.shadow,
-    border         : `1px solid ${theme.border}`
+    
+  backgroundColor: theme.cardBg,
+  borderRadius   : '12px',
+  padding        : isMobile ? '16px 12px' : '24px',
+  marginBottom   : '24px',
+  boxShadow      : theme.shadow,
+  border         : `1px solid ${theme.border}`
+
   },
   formTitle: {
     fontSize    : '18px',
@@ -236,9 +241,7 @@ function Stock() {
     marginBottom: '20px'
   },
   formGrid: {
-    display             : 'grid',
-    gridTemplateColumns : 'repeat(3, 1fr)',
-    gap                 : '16px'
+    ...grids.grid3
   },
   inputGroup: {
     display      : 'flex',
@@ -276,9 +279,9 @@ function Stock() {
     marginTop: '20px'
   },
   tableCard: {
-    backgroundColor: theme.cardBg,
+     backgroundColor: theme.cardBg,
     borderRadius   : '12px',
-    padding        : '24px',
+    padding        : isMobile ? '16px 12px' : '24px',
     boxShadow      : theme.shadow,
     border         : `1px solid ${theme.border}`,
     overflowX      : 'auto'
