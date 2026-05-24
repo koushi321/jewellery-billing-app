@@ -1198,7 +1198,7 @@ function Billing() {
                 </span>
                 <span style={{
                   ...styles.grandTotalValue,
-                  color: grandTotal < 0 ? '#dc2626' : '#1a1a2e'
+                  color: grandTotal < 0 ? '#dc2626' : '#10b981'
                 }}>
                   ₹{Math.abs(grandTotal).toFixed(2)}
                 </span>
