@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { supabase }            from '../supabaseClient'
+import { supabase }            from '../supabase'
 import { useTheme }            from '../context/ThemeContext'
 import { getTheme }            from '../context/theme'
 import useIsMobile             from '../hooks/useIsMobile'
