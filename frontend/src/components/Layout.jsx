@@ -119,7 +119,7 @@ function Layout({ children }) {
   maxHeight     : isMobile ? '100vh' : 'none',
   overflowY     : isMobile ? 'auto' : 'visible',
   backgroundColor: theme.pageBg,
-  width         : isMobile ? '100%' : 'auto
+  width         : isMobile ? '100%' : 'auto'
       }}>
 
         {isMobile && <MobileHeader />}
