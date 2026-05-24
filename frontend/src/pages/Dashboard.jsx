@@ -1,19 +1,17 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
-import { useTheme }        from '../context/ThemeContext'
-import { getTheme }        from '../context/theme'
-import useIsMobile         from '../hooks/useIsMobile'
-import useResponsiveGrid   from '../hooks/useResponsiveGrid'
-
-const API = 'http://localhost:3001/api/dashboard'
+import { supabase }            from '../supabaseClient'
+import { useTheme }            from '../context/ThemeContext'
+import { getTheme }            from '../context/theme'
+import useIsMobile             from '../hooks/useIsMobile'
+import useResponsiveGrid       from '../hooks/useResponsiveGrid'
 
 function Dashboard() {
   const today = new Date().toISOString().split('T')[0]
 
-  const [date, setDate]       = useState(today)
-  const [data, setData]       = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError]     = useState('')
+  const [date, setDate]             = useState(today)
+  const [data, setData]             = useState(null)
+  const [loading, setLoading]       = useState(true)
+  const [error, setError]           = useState('')
   const [showDatePicker, setShowDatePicker] = useState(false)
 
   const { isDark } = useTheme()
@@ -25,9 +23,73 @@ function Dashboard() {
     try {
       setLoading(true)
       setError('')
-      const response = await axios.get(`${API}/summary/${selectedDate}`)
-      setData(response.data)
-    } catch (_err) {
+
+      // Fetch bills for selected date
+      const { data: bills, error: billsError } = await supabase
+        .from('bills')
+        .select('*')
+        .eq('bill_date', selectedDate)
+        .order('created_at', { ascending: false })
+
+      if (billsError) throw billsError
+
+      // Fetch sales for selected date
+      const { data: sales, error: salesError } = await supabase
+        .from('sales')
+        .select('*')
+        .eq('sale_date', selectedDate)
+        .order('created_at', { ascending: false })
+
+      if (salesError) throw salesError
+
+      // Calculate summary
+      const totalRevenue    = bills.reduce((sum, b) => sum + (b.grand_total || 0), 0)
+      const totalBills      = bills.length
+      const goldWeight      = sales.filter(s => s.category === 'Gold').reduce((sum, s) => sum + (s.weight_sold_g || 0), 0)
+      const silverWeight    = sales.filter(s => s.category === 'Silver').reduce((sum, s) => sum + (s.weight_sold_g || 0), 0)
+      const pattiluWeight   = sales.filter(s => s.category === 'Pattilu').reduce((sum, s) => sum + (s.weight_sold_g || 0), 0)
+
+      // Fetch weight checks
+      const { data: weightChecks } = await supabase
+        .from('weight_checks')
+        .select('*')
+        .eq('check_date', selectedDate)
+
+      const pattiluChecked  = weightChecks ? weightChecks.length : 0
+      const pattiluAllMatch = weightChecks ? weightChecks.every(w => w.is_match) : false
+
+      // Old gold/silver from bills items_json
+      let oldGoldWeight   = 0
+      let oldSilverWeight = 0
+      bills.forEach(bill => {
+        try {
+          const parsed = JSON.parse(bill.items_json)
+          const items  = Array.isArray(parsed) ? parsed : parsed.items || []
+          items.forEach(item => {
+            if (item.type === 'old_gold')   oldGoldWeight   += item.weight || 0
+            if (item.type === 'old_silver') oldSilverWeight += item.weight || 0
+          })
+        } catch (_) {}
+      })
+
+      setData({
+        bills,
+        sales,
+        summary: {
+          totalRevenue,
+          totalBills,
+          goldWeight,
+          silverWeight,
+          pattiluWeight,
+          pattiluChecked,
+          pattiluAllMatch,
+          oldGoldWeight,
+          oldSilverWeight
+        }
+      })
+
+    } catch (err) {
+      console.error(err)
       setError('Failed to load dashboard data')
     } finally {
       setLoading(false)
@@ -64,11 +126,7 @@ function Dashboard() {
         marginBottom   : '20px'
       }}>
         <div>
-          <p style={{
-            fontSize  : '13px',
-            color     : theme.textSecondary,
-            fontWeight: '500'
-          }}>
+          <p style={{ fontSize: '13px', color: theme.textSecondary, fontWeight: '500' }}>
             {isToday ? 'Today' : 'Viewing'}
           </p>
           <h1 style={{
@@ -81,7 +139,6 @@ function Dashboard() {
           </h1>
         </div>
 
-        {/* Date picker button */}
         <div>
           {showDatePicker ? (
             <input
@@ -139,11 +196,7 @@ function Dashboard() {
       )}
 
       {loading ? (
-        <div style={{
-          display        : 'flex',
-          flexDirection  : 'column',
-          gap            : '12px'
-        }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {[1,2,3].map(i => (
             <div key={i} style={{
               height         : '80px',
@@ -157,68 +210,46 @@ function Dashboard() {
         <>
           {/* ── Revenue Hero Card ── */}
           <div style={{
-            background    : 'linear-gradient(135deg, #1a1a2e 0%, #2d2d5e 100%)',
-            borderRadius  : '20px',
-            padding       : '24px',
-            marginBottom  : '16px',
-            boxShadow     : '0 8px 32px rgba(26,26,46,0.3)',
-            position      : 'relative',
-            overflow      : 'hidden'
+            background  : 'linear-gradient(135deg, #1a1a2e 0%, #2d2d5e 100%)',
+            borderRadius: '20px',
+            padding     : '24px',
+            marginBottom: '16px',
+            boxShadow   : '0 8px 32px rgba(26,26,46,0.3)',
+            position    : 'relative',
+            overflow    : 'hidden'
           }}>
-            {/* Background decoration */}
             <div style={{
-              position      : 'absolute',
-              top           : '-20px',
-              right         : '-20px',
-              width         : '120px',
-              height        : '120px',
-              borderRadius  : '50%',
+              position       : 'absolute', top: '-20px', right: '-20px',
+              width          : '120px', height: '120px', borderRadius: '50%',
               backgroundColor: 'rgba(245,158,11,0.1)'
             }} />
             <div style={{
-              position      : 'absolute',
-              bottom        : '-30px',
-              right         : '40px',
-              width         : '80px',
-              height        : '80px',
-              borderRadius  : '50%',
+              position       : 'absolute', bottom: '-30px', right: '40px',
+              width          : '80px', height: '80px', borderRadius: '50%',
               backgroundColor: 'rgba(245,158,11,0.05)'
             }} />
-
-            <p style={{
-              fontSize  : '13px',
-              color     : 'rgba(255,255,255,0.6)',
-              fontWeight: '500',
-              marginBottom: '6px'
-            }}>
+            <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)', fontWeight: '500', marginBottom: '6px' }}>
               Total Revenue
             </p>
             <p style={{
-              fontSize  : isMobile ? '32px' : '40px',
-              fontWeight: '800',
-              color     : '#ffffff',
-              marginBottom: '16px',
+              fontSize     : isMobile ? '32px' : '40px',
+              fontWeight   : '800',
+              color        : '#ffffff',
+              marginBottom : '16px',
               letterSpacing: '-1px'
             }}>
               {formatCurrency(data.summary.totalRevenue)}
             </p>
-            <div style={{
-              display : 'flex',
-              gap     : '16px'
-            }}>
+            <div style={{ display: 'flex', gap: '16px' }}>
               <div>
-                <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>
-                  Bills
-                </p>
+                <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>Bills</p>
                 <p style={{ fontSize: '16px', fontWeight: '700', color: '#f59e0b' }}>
                   {data.summary.totalBills}
                 </p>
               </div>
               <div style={{ width: '1px', backgroundColor: 'rgba(255,255,255,0.1)' }} />
               <div>
-                <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>
-                  Items Sold
-                </p>
+                <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>Items Sold</p>
                 <p style={{ fontSize: '16px', fontWeight: '700', color: '#f59e0b' }}>
                   {data.sales.length}
                 </p>
@@ -227,125 +258,81 @@ function Dashboard() {
           </div>
 
           {/* ── Stat Cards Grid ── */}
-          <div style={{
-            ...grids.grid2,
-            marginBottom: '16px'
-          }}>
+          <div style={{ ...grids.grid2, marginBottom: '16px' }}>
 
-            {/* Gold Sold */}
             <div style={{
-              backgroundColor: theme.cardBg,
-              borderRadius   : '16px',
-              padding        : '16px',
-              boxShadow      : theme.shadowSm,
-              border         : `1px solid ${theme.border}`
+              backgroundColor: theme.cardBg, borderRadius: '16px',
+              padding: '16px', boxShadow: theme.shadowSm, border: `1px solid ${theme.border}`
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <p style={{ fontSize: '12px', color: theme.textSecondary, fontWeight: '600' }}>
-                  Gold Sold
-                </p>
+                <p style={{ fontSize: '12px', color: theme.textSecondary, fontWeight: '600' }}>Gold Sold</p>
                 <div style={{
                   width: '28px', height: '28px', borderRadius: '8px',
                   backgroundColor: '#fef3c7',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: '14px'
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px'
                 }}>🥇</div>
               </div>
-              <p style={{
-                fontSize: '22px', fontWeight: '800',
-                color: '#f59e0b', marginTop: '8px'
-              }}>
+              <p style={{ fontSize: '22px', fontWeight: '800', color: '#f59e0b', marginTop: '8px' }}>
                 {data.summary.goldWeight.toFixed(2)}g
               </p>
             </div>
 
-            {/* Silver Sold */}
             <div style={{
-              backgroundColor: theme.cardBg,
-              borderRadius   : '16px',
-              padding        : '16px',
-              boxShadow      : theme.shadowSm,
-              border         : `1px solid ${theme.border}`
+              backgroundColor: theme.cardBg, borderRadius: '16px',
+              padding: '16px', boxShadow: theme.shadowSm, border: `1px solid ${theme.border}`
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <p style={{ fontSize: '12px', color: theme.textSecondary, fontWeight: '600' }}>
-                  Silver Sold
-                </p>
+                <p style={{ fontSize: '12px', color: theme.textSecondary, fontWeight: '600' }}>Silver Sold</p>
                 <div style={{
                   width: '28px', height: '28px', borderRadius: '8px',
                   backgroundColor: '#f1f5f9',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: '14px'
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px'
                 }}>🥈</div>
               </div>
-              <p style={{
-                fontSize: '22px', fontWeight: '800',
-                color: '#64748b', marginTop: '8px'
-              }}>
+              <p style={{ fontSize: '22px', fontWeight: '800', color: '#64748b', marginTop: '8px' }}>
                 {data.summary.silverWeight.toFixed(2)}g
               </p>
             </div>
 
-            {/* Pattilu Sold */}
             <div style={{
-              backgroundColor: theme.cardBg,
-              borderRadius   : '16px',
-              padding        : '16px',
-              boxShadow      : theme.shadowSm,
-              border         : `1px solid ${theme.border}`
+              backgroundColor: theme.cardBg, borderRadius: '16px',
+              padding: '16px', boxShadow: theme.shadowSm, border: `1px solid ${theme.border}`
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <p style={{ fontSize: '12px', color: theme.textSecondary, fontWeight: '600' }}>
-                  Pattilu Sold
-                </p>
+                <p style={{ fontSize: '12px', color: theme.textSecondary, fontWeight: '600' }}>Pattilu Sold</p>
                 <div style={{
                   width: '28px', height: '28px', borderRadius: '8px',
                   backgroundColor: '#ede9fe',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: '14px'
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px'
                 }}>💫</div>
               </div>
-              <p style={{
-                fontSize: '22px', fontWeight: '800',
-                color: '#8b5cf6', marginTop: '8px'
-              }}>
+              <p style={{ fontSize: '22px', fontWeight: '800', color: '#8b5cf6', marginTop: '8px' }}>
                 {data.summary.pattiluWeight.toFixed(2)}g
               </p>
             </div>
 
-            {/* Pattilu Check */}
             <div style={{
-              backgroundColor: theme.cardBg,
-              borderRadius   : '16px',
-              padding        : '16px',
-              boxShadow      : theme.shadowSm,
-              border         : `1px solid ${theme.border}`
+              backgroundColor: theme.cardBg, borderRadius: '16px',
+              padding: '16px', boxShadow: theme.shadowSm, border: `1px solid ${theme.border}`
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <p style={{ fontSize: '12px', color: theme.textSecondary, fontWeight: '600' }}>
-                  Weight Check
-                </p>
+                <p style={{ fontSize: '12px', color: theme.textSecondary, fontWeight: '600' }}>Weight Check</p>
                 <div style={{
                   width: '28px', height: '28px', borderRadius: '8px',
                   backgroundColor: data.summary.pattiluChecked === 0
-                    ? '#f1f5f9'
-                    : data.summary.pattiluAllMatch ? '#d1fae5' : '#fee2e2',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: '14px'
+                    ? '#f1f5f9' : data.summary.pattiluAllMatch ? '#d1fae5' : '#fee2e2',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px'
                 }}>⚖️</div>
               </div>
               <p style={{
-                fontSize: '18px', fontWeight: '800',
+                fontSize: '18px', fontWeight: '800', marginTop: '8px',
                 color: data.summary.pattiluChecked === 0
                   ? theme.textSecondary
-                  : data.summary.pattiluAllMatch ? '#10b981' : '#ef4444',
-                marginTop: '8px'
+                  : data.summary.pattiluAllMatch ? '#10b981' : '#ef4444'
               }}>
                 {data.summary.pattiluChecked === 0
                   ? 'Not Done'
-                  : data.summary.pattiluAllMatch
-                    ? '✓ OK'
-                    : '⚠ Check'}
+                  : data.summary.pattiluAllMatch ? '✓ OK' : '⚠ Check'}
               </p>
             </div>
 
@@ -354,19 +341,11 @@ function Dashboard() {
           {/* ── Old Gold/Silver Received ── */}
           {(data.summary.oldGoldWeight > 0 || data.summary.oldSilverWeight > 0) && (
             <div style={{
-              backgroundColor: theme.cardBg,
-              borderRadius   : '16px',
-              padding        : '16px',
-              marginBottom   : '16px',
-              boxShadow      : theme.shadowSm,
-              border         : `1px solid ${theme.border}`
+              backgroundColor: theme.cardBg, borderRadius: '16px',
+              padding: '16px', marginBottom: '16px',
+              boxShadow: theme.shadowSm, border: `1px solid ${theme.border}`
             }}>
-              <p style={{
-                fontSize    : '13px',
-                fontWeight  : '700',
-                color       : theme.textPrimary,
-                marginBottom: '12px'
-              }}>
+              <p style={{ fontSize: '13px', fontWeight: '700', color: theme.textPrimary, marginBottom: '12px' }}>
                 Old Items Received Today
               </p>
               <div style={{ display: 'flex', gap: '24px' }}>
@@ -392,27 +371,16 @@ function Dashboard() {
 
           {/* ── Recent Bills ── */}
           <div style={{ marginBottom: '16px' }}>
-            <p style={{
-              fontSize    : '15px',
-              fontWeight  : '700',
-              color       : theme.textPrimary,
-              marginBottom: '12px'
-            }}>
+            <p style={{ fontSize: '15px', fontWeight: '700', color: theme.textPrimary, marginBottom: '12px' }}>
               Bills — {data.bills.length} total
             </p>
-
             {data.bills.length === 0 ? (
               <div style={{
-                backgroundColor: theme.cardBg,
-                borderRadius   : '16px',
-                padding        : '32px',
-                textAlign      : 'center',
-                border         : `1px solid ${theme.border}`
+                backgroundColor: theme.cardBg, borderRadius: '16px',
+                padding: '32px', textAlign: 'center', border: `1px solid ${theme.border}`
               }}>
                 <p style={{ fontSize: '32px', marginBottom: '8px' }}>📋</p>
-                <p style={{ color: theme.textSecondary, fontSize: '14px' }}>
-                  No bills for this date
-                </p>
+                <p style={{ color: theme.textSecondary, fontSize: '14px' }}>No bills for this date</p>
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -421,53 +389,28 @@ function Dashboard() {
                   const items  = Array.isArray(parsed) ? parsed : parsed.items || []
                   return (
                     <div key={bill.id} style={{
-                      backgroundColor: theme.cardBg,
-                      borderRadius   : '16px',
-                      padding        : '16px',
-                      boxShadow      : theme.shadowSm,
-                      border         : `1px solid ${theme.border}`,
-                      display        : 'flex',
-                      justifyContent : 'space-between',
-                      alignItems     : 'center'
+                      backgroundColor: theme.cardBg, borderRadius: '16px',
+                      padding: '16px', boxShadow: theme.shadowSm,
+                      border: `1px solid ${theme.border}`,
+                      display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                     }}>
                       <div>
-                        <p style={{
-                          fontSize  : '13px',
-                          fontWeight: '700',
-                          color     : '#f59e0b'
-                        }}>
+                        <p style={{ fontSize: '13px', fontWeight: '700', color: '#f59e0b' }}>
                           {bill.bill_number}
                         </p>
-                        <p style={{
-                          fontSize  : '14px',
-                          fontWeight: '600',
-                          color     : theme.textPrimary,
-                          marginTop : '2px'
-                        }}>
+                        <p style={{ fontSize: '14px', fontWeight: '600', color: theme.textPrimary, marginTop: '2px' }}>
                           {bill.customer_name}
                         </p>
-                        <p style={{
-                          fontSize : '12px',
-                          color    : theme.textSecondary,
-                          marginTop: '2px'
-                        }}>
+                        <p style={{ fontSize: '12px', color: theme.textSecondary, marginTop: '2px' }}>
                           {items.length} item{items.length > 1 ? 's' : ''}
                         </p>
                       </div>
                       <div style={{ textAlign: 'right' }}>
-                        <p style={{
-                          fontSize  : '16px',
-                          fontWeight: '800',
-                          color     : '#10b981'
-                        }}>
+                        <p style={{ fontSize: '16px', fontWeight: '800', color: '#10b981' }}>
                           {formatCurrency(bill.grand_total)}
                         </p>
                         {bill.discount > 0 && (
-                          <p style={{
-                            fontSize : '11px',
-                            color    : theme.textSecondary,
-                            marginTop: '2px'
-                          }}>
+                          <p style={{ fontSize: '11px', color: theme.textSecondary, marginTop: '2px' }}>
                             Disc: {formatCurrency(bill.discount)}
                           </p>
                         )}
@@ -482,63 +425,35 @@ function Dashboard() {
           {/* ── Sales Breakdown ── */}
           {data.sales.length > 0 && (
             <div>
-              <p style={{
-                fontSize    : '15px',
-                fontWeight  : '700',
-                color       : theme.textPrimary,
-                marginBottom: '12px'
-              }}>
+              <p style={{ fontSize: '15px', fontWeight: '700', color: theme.textPrimary, marginBottom: '12px' }}>
                 Sales Breakdown
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {data.sales.map((sale) => (
                   <div key={sale.id} style={{
-                    backgroundColor: theme.cardBg,
-                    borderRadius   : '14px',
-                    padding        : '14px 16px',
-                    border         : `1px solid ${theme.border}`,
-                    display        : 'flex',
-                    justifyContent : 'space-between',
-                    alignItems     : 'center'
+                    backgroundColor: theme.cardBg, borderRadius: '14px',
+                    padding: '14px 16px', border: `1px solid ${theme.border}`,
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <div style={{
-                        width          : '36px',
-                        height         : '36px',
-                        borderRadius   : '10px',
-                        backgroundColor: sale.category === 'Gold'
-                          ? '#fef3c7'
-                          : sale.category === 'Pattilu'
-                            ? '#ede9fe' : '#f1f5f9',
-                        display        : 'flex',
-                        alignItems     : 'center',
-                        justifyContent : 'center',
-                        fontSize       : '16px'
+                        width: '36px', height: '36px', borderRadius: '10px',
+                        backgroundColor: sale.category === 'Gold' ? '#fef3c7'
+                          : sale.category === 'Pattilu' ? '#ede9fe' : '#f1f5f9',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px'
                       }}>
                         {sale.category === 'Gold' ? '🥇' : sale.category === 'Pattilu' ? '💫' : '🥈'}
                       </div>
                       <div>
-                        <p style={{
-                          fontSize  : '14px',
-                          fontWeight: '600',
-                          color     : theme.textPrimary
-                        }}>
+                        <p style={{ fontSize: '14px', fontWeight: '600', color: theme.textPrimary }}>
                           {sale.item_name}
                         </p>
-                        <p style={{
-                          fontSize : '12px',
-                          color    : theme.textSecondary,
-                          marginTop: '1px'
-                        }}>
+                        <p style={{ fontSize: '12px', color: theme.textSecondary, marginTop: '1px' }}>
                           {sale.weight_sold_g}g × ₹{sale.rate_per_gram}/g
                         </p>
                       </div>
                     </div>
-                    <p style={{
-                      fontSize  : '15px',
-                      fontWeight: '700',
-                      color     : '#10b981'
-                    }}>
+                    <p style={{ fontSize: '15px', fontWeight: '700', color: '#10b981' }}>
                       {formatCurrency(sale.total_price)}
                     </p>
                   </div>
