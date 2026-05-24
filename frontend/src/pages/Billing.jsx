@@ -938,35 +938,46 @@ function Billing() {
         </div>
 
         {/* Live Price Preview */}
-        {currentItem.item_id && currentItem.actual_weight && currentItem.rate && (
-          <div style={styles.pricePreview}>
-            {(() => {
-              const calc = calculateItemPrice(currentItem)
-              return (
-                <div style={styles.previewGrid}>
-                  <div style={styles.previewItem}>
-                    <span style={styles.previewLabel}>Billing Weight</span>
-                    <span style={styles.previewValue}>{calc.billing_weight.toFixed(3)}g</span>
-                  </div>
-                  <div style={styles.previewItem}>
-                    <span style={styles.previewLabel}>Item Price</span>
-                    <span style={styles.previewValue}>₹{calc.price.toFixed(2)}</span>
-                  </div>
-                  <div style={styles.previewItem}>
-                    <span style={styles.previewLabel}>Making Charges</span>
-                    <span style={styles.previewValue}>₹{calc.making_charges.toFixed(2)}</span>
-                  </div>
-                  <div style={styles.previewItem}>
-                    <span style={styles.previewLabel}>Item Total</span>
-                    <span style={{ ...styles.previewValue, color: '#1a1a2e', fontWeight: '700' }}>
-                      ₹{calc.total_price.toFixed(2)}
-                    </span>
-                  </div>
-                </div>
-              )
-            })()}
+        {currentItem.actual_weight && currentItem.rate && (
+  <div style={styles.pricePreview}>
+    {(() => {
+      const calc = calculateItemPrice(currentItem)
+      return (
+        <div style={styles.previewGrid}>
+
+          <div style={styles.previewItem}>
+            <span style={styles.previewLabel}>Billing Weight</span>
+            <span style={{ ...styles.previewValue, color: '#3b82f6' }}>
+              {calc.billing_weight.toFixed(3)}g
+            </span>
           </div>
-        )}
+
+          <div style={styles.previewItem}>
+            <span style={styles.previewLabel}>Item Price</span>
+            <span style={{ ...styles.previewValue, color: '#f59e0b' }}>
+              ₹{calc.price.toFixed(2)}
+            </span>
+          </div>
+
+          <div style={styles.previewItem}>
+            <span style={styles.previewLabel}>Making Charges</span>
+            <span style={{ ...styles.previewValue, color: '#8b5cf6' }}>
+              ₹{calc.making_charges.toFixed(2)}
+            </span>
+          </div>
+
+          <div style={styles.previewItem}>
+            <span style={styles.previewLabel}>Item Total</span>
+            <span style={{ ...styles.previewValue, color: '#10b981', fontWeight: '800' }}>
+              ₹{calc.total_price.toFixed(2)}
+            </span>
+          </div>
+
+        </div>
+      )
+    })()}
+  </div>
+)}
 
         <button style={styles.addItemButton} onClick={handleAddItem}>
           Add to Bill
