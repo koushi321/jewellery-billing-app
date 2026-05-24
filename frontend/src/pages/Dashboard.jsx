@@ -63,8 +63,11 @@ function Dashboard() {
       let oldSilverWeight = 0
       bills.forEach(bill => {
         try {
-          const parsed = JSON.parse(bill.items_json)
-          const items  = Array.isArray(parsed) ? parsed : parsed.items || []
+          const parsed = typeof bill.items_json === 'string' 
+  ? JSON.parse(bill.items_json) 
+  : bill.items_json
+const items = Array.isArray(parsed) ? parsed : parsed.items || []
+
           items.forEach(item => {
             if (item.type === 'old_gold')   oldGoldWeight   += item.weight || 0
             if (item.type === 'old_silver') oldSilverWeight += item.weight || 0
@@ -385,8 +388,10 @@ function Dashboard() {
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {data.bills.map((bill) => {
-                  const parsed = JSON.parse(bill.items_json)
-                  const items  = Array.isArray(parsed) ? parsed : parsed.items || []
+                  const parsed = typeof bill.items_json === 'string'
+     ? JSON.parse(bill.items_json)
+         : bill.items_json
+          const items = Array.isArray(parsed) ? parsed : parsed.items || []
                   return (
                     <div key={bill.id} style={{
                       backgroundColor: theme.cardBg, borderRadius: '16px',
