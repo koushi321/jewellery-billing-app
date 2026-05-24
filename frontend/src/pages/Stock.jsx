@@ -1,20 +1,25 @@
-import useIsMobile       from '../hooks/useIsMobile'
-import useResponsiveGrid from '../hooks/useResponsiveGrid'
-import { useTheme } from '../context/ThemeContext'
-import { getTheme } from '../context/theme'
 import { useState, useEffect } from 'react'
-import { supabase } from '../supabase'
+import axios from 'axios'
+import { useTheme }        from '../context/ThemeContext'
+import { getTheme }        from '../context/theme'
+import useIsMobile         from '../hooks/useIsMobile'
+import useResponsiveGrid   from '../hooks/useResponsiveGrid'
+
+const API = 'http://localhost:3001/api/stock'
 
 function Stock() {
-  const isMobile = useIsMobile()
-  const grids    = useResponsiveGrid()
+
   const { isDark } = useTheme()
   const theme      = getTheme(isDark)
+  const isMobile   = useIsMobile()
+  const grids      = useResponsiveGrid()
+
   const [items, setItems]       = useState([])
   const [loading, setLoading]   = useState(true)
-  const [error, setError]               = useState('')
+  const [error, setError]       = useState('')
   const [showForm, setShowForm] = useState(false)
   const [editItem, setEditItem] = useState(null)
+  const [filter, setFilter]     = useState('All')
 
   const [form, setForm] = useState({
     name            : '',
@@ -25,16 +30,13 @@ function Stock() {
     reorder_weight_g: ''
   })
 
+  // ── FETCH STOCK ────────────────────────────────────────
   const fetchStock = async () => {
     try {
       setLoading(true)
-      const { data, error } = await supabase
-        .from('stock')
-        .select('*')
-        .order('created_at', { ascending: false })
-      if (error) throw error
-      setItems(data || [])
-    } catch {
+      const response = await axios.get(API)
+      setItems(response.data)
+    } catch (_err) {
       setError('Failed to load stock')
     } finally {
       setLoading(false)
@@ -43,72 +45,53 @@ function Stock() {
 
   useEffect(() => {
     let cancelled = false
-    const loadStock = async () => {
+    const load = async () => {
       try {
         setLoading(true)
-        const { data, error } = await supabase
-          .from('stock')
-          .select('*')
-          .order('created_at', { ascending: false })
-        if (error) throw error
-        if (!cancelled) setItems(data || [])
-      } catch {
+        const response = await axios.get(API)
+        if (!cancelled) setItems(response.data)
+      } catch (_err) {
         if (!cancelled) setError('Failed to load stock')
       } finally {
         if (!cancelled) setLoading(false)
       }
     }
-    loadStock()
+    load()
     return () => { cancelled = true }
   }, [])
 
+  // ── FILTER ─────────────────────────────────────────────
+  const filteredItems = filter === 'All'
+    ? items
+    : items.filter(i => i.category === filter)
+
+  // ── HANDLE CHANGE ──────────────────────────────────────
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
-  // When category changes reset box weight
   const handleCategoryChange = (e) => {
-    setForm({
-      ...form,
-      category    : e.target.value,
-      box_weight_g: ''
-    })
+    setForm({ ...form, category: e.target.value, box_weight_g: '' })
   }
 
+  // ── ADD ITEM ───────────────────────────────────────────
   const handleAdd = async () => {
     try {
-      setError('')
-      const total_weight = parseFloat(form.total_weight_g)
-      const box_weight = form.category === 'Silver' ? parseFloat(form.box_weight_g) || 0 : 0
-      const net_weight = form.category === 'Silver' ? total_weight - box_weight : total_weight
-
-      if (form.category === 'Silver' && net_weight < 0) {
-        setError('Total weight must be greater than box weight')
-        return
-      }
-
-      const { error } = await supabase
-        .from('stock')
-        .insert({
-          name: form.name,
-          category: form.category,
-          box_name: form.category === 'Silver' ? form.box_name || '' : '',
-          total_weight_g: total_weight,
-          box_weight_g: box_weight,
-          net_weight_g: net_weight,
-          reorder_weight_g: parseFloat(form.reorder_weight_g) || 10
-        })
-
-      if (error) throw error
-
+      await axios.post(API, {
+        ...form,
+        total_weight_g  : parseFloat(form.total_weight_g),
+        box_weight_g    : parseFloat(form.box_weight_g) || 0,
+        reorder_weight_g: parseFloat(form.reorder_weight_g) || 10
+      })
       setForm({ name: '', category: 'Gold', box_name: '', total_weight_g: '', box_weight_g: '', reorder_weight_g: '' })
       setShowForm(false)
       fetchStock()
     } catch (err) {
-      setError(err.message || 'Failed to add item')
+      setError(err.response?.data?.error || 'Failed to add item')
     }
   }
 
+  // ── EDIT ITEM ──────────────────────────────────────────
   const handleEditClick = (item) => {
     setEditItem(item)
     setForm({
@@ -124,436 +107,801 @@ function Stock() {
 
   const handleUpdate = async () => {
     try {
-      setError('')
-      const total_weight = parseFloat(form.total_weight_g)
-      const box_weight = (form.category === 'Silver' || form.category === 'Pattilu') ? parseFloat(form.box_weight_g) || 0 : 0
-      const net_weight = (form.category === 'Silver' || form.category === 'Pattilu') ? total_weight - box_weight : total_weight
-
-      const { error } = await supabase
-        .from('stock')
-        .update({
-          name: form.name,
-          category: form.category,
-          box_name: form.category === 'Silver' ? form.box_name || '' : '',
-          total_weight_g: total_weight,
-          box_weight_g: box_weight,
-          net_weight_g: net_weight,
-          reorder_weight_g: parseFloat(form.reorder_weight_g),
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', editItem.id)
-
-      if (error) throw error
-
+      await axios.put(`${API}/${editItem.id}`, {
+        ...form,
+        total_weight_g  : parseFloat(form.total_weight_g),
+        box_weight_g    : parseFloat(form.box_weight_g) || 0,
+        reorder_weight_g: parseFloat(form.reorder_weight_g)
+      })
       setEditItem(null)
       setForm({ name: '', category: 'Gold', box_name: '', total_weight_g: '', box_weight_g: '', reorder_weight_g: '' })
       setShowForm(false)
       fetchStock()
     } catch (err) {
-      setError(err.message || 'Failed to update item')
+      setError(err.response?.data?.error || 'Failed to update item')
     }
   }
 
+  // ── DELETE ITEM ────────────────────────────────────────
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this item?')) return
+    if (!window.confirm('Delete this item?')) return
     try {
-      const { error } = await supabase
-        .from('stock')
-        .delete()
-        .eq('id', id)
-      if (error) throw error
+      await axios.delete(`${API}/${id}`)
       fetchStock()
-    } catch {
+    } catch (_err) {
       setError('Failed to delete item')
     }
   }
 
-  // Net weight preview — only for silver
-  const netWeightPreview = form.category === 'Silver' &&
+  // ── NET WEIGHT PREVIEW ─────────────────────────────────
+  const netWeightPreview = form.category !== 'Gold' &&
     form.total_weight_g && form.box_weight_g
       ? (parseFloat(form.total_weight_g) - parseFloat(form.box_weight_g)).toFixed(2)
       : null
 
+  // ── STATUS ─────────────────────────────────────────────
   const getStatus = (item) => {
-    if (item.net_weight_g <= 0)                     return { label: 'Out of Stock', color: '#dc2626' }
-    if (item.net_weight_g <= item.reorder_weight_g) return { label: 'Low Stock',    color: '#f59e0b' }
-    return                                                  { label: 'In Stock',     color: '#16a34a' }
+    if (item.net_weight_g <= 0)                     return { label: 'Out of Stock', color: '#ef4444', bg: '#fee2e2' }
+    if (item.net_weight_g <= item.reorder_weight_g) return { label: 'Low Stock',    color: '#f59e0b', bg: '#fef3c7' }
+    return                                                  { label: 'In Stock',     color: '#10b981', bg: '#d1fae5' }
   }
-  const styles = {
-  pageHeader: {
-    display       : 'flex',
-    justifyContent: 'space-between',
-    alignItems    : 'center',
-    marginBottom  : '24px'
-  },
-  pageTitle: {
-    fontSize  : '24px',
-    fontWeight: 'bold',
-    color     : theme.textPrimary
-  },
-  pageSubtitle: {
-    fontSize : '14px',
-    color    : theme.textSecondary,
-    marginTop: '4px'
-  },
-  addButton: {
-    backgroundColor: '#1a1a2e',
-    color          : 'white',
-    border         : 'none',
-    padding        : '10px 20px',
-    borderRadius   : '8px',
-    fontSize       : '14px',
-    fontWeight     : '600',
-    cursor         : 'pointer'
-  },
-  cancelButton: {
-    backgroundColor: theme.cardBg,
-    color          : theme.textPrimary,
-    border         : `1px solid ${theme.borderInput}`,
-    padding        : '10px 20px',
-    borderRadius   : '8px',
-    fontSize       : '14px',
-    fontWeight     : '600',
-    cursor         : 'pointer'
-  },
-  error: {
-    backgroundColor: '#fee2e2',
-    color          : '#dc2626',
-    padding        : '12px',
-    borderRadius   : '8px',
-    marginBottom   : '16px',
-    fontSize       : '14px'
-  },
-  formCard: {
-    
-  backgroundColor: theme.cardBg,
-  borderRadius   : '12px',
-  padding        : isMobile ? '16px 12px' : '24px',
-  marginBottom   : '24px',
-  boxShadow      : theme.shadow,
-  border         : `1px solid ${theme.border}`
 
-  },
-  formTitle: {
-    fontSize    : '18px',
-    fontWeight  : '600',
-    color       : theme.textPrimary,
-    marginBottom: '20px'
-  },
-  formGrid: {
-    ...grids.grid3
-  },
-  inputGroup: {
-    display      : 'flex',
-    flexDirection: 'column'
-  },
-  label: {
-    fontSize    : '13px',
-    fontWeight  : '600',
-    color       : theme.textPrimary,
-    marginBottom: '6px'
-  },
-  input: {
-    padding        : '10px 12px',
-    borderRadius   : '8px',
-    border         : `1px solid ${theme.borderInput}`,
-    fontSize       : '14px',
-    outline        : 'none',
-    width          : '100%',
-    boxSizing      : 'border-box',
-    backgroundColor: theme.inputBg,
-    color          : theme.textPrimary
-  },
-  netWeightPreview: {
-    marginTop      : '16px',
-    padding        : '12px 16px',
-    backgroundColor: isDark ? '#052e16' : '#f0fdf4',
-    borderRadius   : '8px',
-    fontSize       : '14px',
-    color          : '#16a34a',
-    border         : '1px solid #bbf7d0'
-  },
-  formButtons: {
-    display  : 'flex',
-    gap      : '12px',
-    marginTop: '20px'
-  },
-  tableCard: {
-     backgroundColor: theme.cardBg,
-    borderRadius   : '12px',
-    padding        : isMobile ? '16px 12px' : '24px',
-    boxShadow      : theme.shadow,
-    border         : `1px solid ${theme.border}`,
-    overflowX      : 'auto'
-  },
-  table: {
-    width         : '100%',
-    borderCollapse: 'collapse'
-  },
-  tableHeader: {
-    backgroundColor: theme.headerBg
-  },
-  th: {
-    padding     : '12px 16px',
-    textAlign   : 'left',
-    fontSize    : '13px',
-    fontWeight  : '600',
-    color       : theme.textSecondary,
-    borderBottom: `1px solid ${theme.border}`
-  },
-  tableRow: {
-    borderBottom: `1px solid ${theme.border}`
-  },
-  td: {
-    padding : '14px 16px',
-    fontSize: '14px',
-    color   : theme.textPrimary
-  },
-  statusBadge: {
-    color        : 'white',
-    padding      : '4px 10px',
-    borderRadius : '20px',
-    fontSize     : '12px',
-    fontWeight   : '600'
-  },
-  editButton: {
-    backgroundColor: '#f59e0b',
-    color          : 'white',
-    border         : 'none',
-    padding        : '6px 14px',
-    borderRadius   : '6px',
-    fontSize       : '13px',
-    cursor         : 'pointer',
-    marginRight    : '8px'
-  },
-  deleteButton: {
-    backgroundColor: '#dc2626',
-    color          : 'white',
-    border         : 'none',
-    padding        : '6px 14px',
-    borderRadius   : '6px',
-    fontSize       : '13px',
-    cursor         : 'pointer'
-  },
-  loadingText: {
-    color   : theme.textSecondary,
-    fontSize: '14px'
-  },
-  emptyText: {
-    color    : theme.textSecondary,
-    fontSize : '14px',
-    textAlign: 'center',
-    padding  : '40px'
+  // ── CATEGORY ICON ──────────────────────────────────────
+  const getCategoryIcon = (category) => {
+    if (category === 'Gold')    return { icon: '🥇', bg: '#fef3c7', color: '#f59e0b' }
+    if (category === 'Silver')  return { icon: '🥈', bg: '#f1f5f9', color: '#64748b' }
+    if (category === 'Pattilu') return { icon: '💫', bg: '#ede9fe', color: '#8b5cf6' }
+    return                             { icon: '📦', bg: '#f1f5f9', color: '#64748b' }
   }
-}
+
+  // ── STOCK SUMMARY ──────────────────────────────────────
+  const goldItems    = items.filter(i => i.category === 'Gold')
+  const silverItems  = items.filter(i => i.category === 'Silver')
+  const pattiluItems = items.filter(i => i.category === 'Pattilu')
+  const lowItems     = items.filter(i => i.net_weight_g <= i.reorder_weight_g)
 
   return (
     <div>
-      <div style={styles.pageHeader}>
+
+      {/* ── Page Header ── */}
+      <div style={{
+        display        : 'flex',
+        justifyContent : 'space-between',
+        alignItems     : 'center',
+        marginBottom   : '20px'
+      }}>
         <div>
-          <h1 style={styles.pageTitle}>Stock Management</h1>
-          <p style={styles.pageSubtitle}>Manage your gold and silver inventory</p>
+          <h1 style={{
+            fontSize  : isMobile ? '20px' : '24px',
+            fontWeight: '800',
+            color     : theme.textPrimary
+          }}>
+            Stock
+          </h1>
+          <p style={{
+            fontSize : '13px',
+            color    : theme.textSecondary,
+            marginTop: '2px'
+          }}>
+            {items.length} items total
+          </p>
         </div>
         <button
-          style={styles.addButton}
           onClick={() => {
             setEditItem(null)
             setForm({ name: '', category: 'Gold', box_name: '', total_weight_g: '', box_weight_g: '', reorder_weight_g: '' })
             setShowForm(true)
           }}
+          style={{
+            backgroundColor: '#1a1a2e',
+            color          : 'white',
+            border         : 'none',
+            padding        : '10px 18px',
+            borderRadius   : '12px',
+            fontSize       : '13px',
+            fontWeight     : '700',
+            cursor         : 'pointer',
+            boxShadow      : '0 4px 12px rgba(26,26,46,0.3)'
+          }}
         >
-          Add Stock Item
+          + Add Item
         </button>
       </div>
 
-      {error && <div style={styles.error}>{error}</div>}
-
-      {showForm && (
-        <div style={styles.formCard}>
-          <h2 style={styles.formTitle}>
-            {editItem ? 'Edit Stock Item' : 'Add New Stock Item'}
-          </h2>
-
-          <div style={styles.formGrid}>
-
-            {/* Item Name */}
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Item Name *</label>
-              <input
-                style={styles.input}
-                name="name"
-                placeholder="e.g. Gold Chain, Silver Ring"
-                value={form.name}
-                onChange={handleChange}
-              />
-            </div>
-
-            {/* Category */}
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Category *</label>
-              <select
-  style={styles.input}
-  name="category"
-  value={form.category}
-  onChange={handleCategoryChange}
->
-  <option value="Gold">Gold</option>
-  <option value="Silver">Silver</option>
-  <option value="Pattilu">Pattilu</option>
-</select>
-            </div>
-
-            {/* Box Name - only for silver */}
-            {form.category === 'Silver' && (
-              <div style={styles.inputGroup}>
-                <label style={styles.label}>Box Name</label>
-                <input
-                  style={styles.input}
-                  name="box_name"
-                  placeholder="e.g. Box A, Red Box"
-                  value={form.box_name}
-                  onChange={handleChange}
-                />
-              </div>
-            )}
-
-            {/* Total Weight */}
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>
-                {form.category === 'Silver'
-                  ? 'Total Weight (g) * — box + items'
-                  : 'Weight (g) * — actual gold weight'}
-              </label>
-              <input
-                style={styles.input}
-                name="total_weight_g"
-                type="number"
-                placeholder={
-                  form.category === 'Silver'
-                    ? 'Box + items weight'
-                    : 'Actual gold weight'
-                }
-                value={form.total_weight_g}
-                onChange={handleChange}
-              />
-            </div>
-
-            {/* Box Weight - only for silver */}
-            {form.category === 'Silver' && (
-              <div style={styles.inputGroup}>
-                <label style={styles.label}>Box Weight (g) *</label>
-                <input
-                  style={styles.input}
-                  name="box_weight_g"
-                  type="number"
-                  placeholder="Empty box weight"
-                  value={form.box_weight_g}
-                  onChange={handleChange}
-                />
-              </div>
-            )}
-
-            {/* Reorder Level */}
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Reorder Alert (g)</label>
-              <input
-                style={styles.input}
-                name="reorder_weight_g"
-                type="number"
-                placeholder="Alert when below this weight"
-                value={form.reorder_weight_g}
-                onChange={handleChange}
-              />
-            </div>
-
-          </div>
-
-          {/* Net Weight Preview - only for silver */}
-          {netWeightPreview && (
-            <div style={styles.netWeightPreview}>
-              Net Weight (Silver items only) = <strong>{netWeightPreview} g</strong>
-            </div>
-          )}
-
-          <div style={styles.formButtons}>
-            <button
-              style={styles.addButton}
-              onClick={editItem ? handleUpdate : handleAdd}
-            >
-              {editItem ? 'Update Item' : 'Save Item'}
-            </button>
-            <button
-              style={styles.cancelButton}
-              onClick={() => {
-                setShowForm(false)
-                setEditItem(null)
-              }}
-            >
-              Cancel
-            </button>
-          </div>
-
+      {error && (
+        <div style={{
+          backgroundColor: '#fee2e2',
+          color          : '#dc2626',
+          padding        : '12px 16px',
+          borderRadius   : '12px',
+          marginBottom   : '16px',
+          fontSize       : '14px'
+        }}>
+          {error}
         </div>
       )}
 
-      {/* Stock Table */}
-      <div style={styles.tableCard}>
-        {loading ? (
-          <p style={styles.loadingText}>Loading stock...</p>
-        ) : items.length === 0 ? (
-          <p style={styles.emptyText}>No stock items yet. Add your first item!</p>
-        ) : (
-          <table style={styles.table}>
+      {/* ── Summary Cards ── */}
+      <div style={{ ...grids.grid4, marginBottom: '20px' }}>
+        {[
+          { label: 'Gold',    count: goldItems.length,    color: '#f59e0b', bg: '#fef3c7', icon: '🥇' },
+          { label: 'Silver',  count: silverItems.length,  color: '#64748b', bg: '#f1f5f9', icon: '🥈' },
+          { label: 'Pattilu', count: pattiluItems.length, color: '#8b5cf6', bg: '#ede9fe', icon: '💫' },
+          { label: 'Low',     count: lowItems.length,     color: '#ef4444', bg: '#fee2e2', icon: '⚠️' },
+        ].map((s) => (
+          <div key={s.label} style={{
+            backgroundColor: theme.cardBg,
+            borderRadius   : '14px',
+            padding        : '14px',
+            border         : `1px solid ${theme.border}`,
+            boxShadow      : theme.shadowSm
+          }}>
+            <div style={{
+              width          : '32px',
+              height         : '32px',
+              borderRadius   : '8px',
+              backgroundColor: s.bg,
+              display        : 'flex',
+              alignItems     : 'center',
+              justifyContent : 'center',
+              fontSize       : '16px',
+              marginBottom   : '8px'
+            }}>
+              {s.icon}
+            </div>
+            <p style={{
+              fontSize  : '20px',
+              fontWeight: '800',
+              color     : s.color
+            }}>
+              {s.count}
+            </p>
+            <p style={{
+              fontSize : '11px',
+              color    : theme.textSecondary,
+              marginTop: '2px'
+            }}>
+              {s.label}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Filter Tabs ── */}
+      <div style={{
+        display       : 'flex',
+        gap           : '8px',
+        marginBottom  : '16px',
+        overflowX     : 'auto',
+        paddingBottom : '4px'
+      }}>
+        {['All', 'Gold', 'Silver', 'Pattilu'].map(f => (
+          <button
+            key={f}
+            onClick={() => setFilter(f)}
+            style={{
+              padding        : '8px 16px',
+              borderRadius   : '20px',
+              border         : 'none',
+              backgroundColor: filter === f ? '#1a1a2e' : theme.cardBg,
+              color          : filter === f ? 'white' : theme.textSecondary,
+              fontSize       : '13px',
+              fontWeight     : '600',
+              cursor         : 'pointer',
+              whiteSpace     : 'nowrap',
+              boxShadow      : theme.shadowSm,
+              border         : `1px solid ${filter === f ? '#1a1a2e' : theme.border}`
+            }}
+          >
+            {f}
+          </button>
+        ))}
+      </div>
+
+      {/* ── Stock Items ── */}
+      {loading ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {[1,2,3].map(i => (
+            <div key={i} style={{
+              height         : '80px',
+              borderRadius   : '16px',
+              backgroundColor: theme.cardBg,
+              opacity        : 0.5
+            }} />
+          ))}
+        </div>
+      ) : filteredItems.length === 0 ? (
+        <div style={{
+          backgroundColor: theme.cardBg,
+          borderRadius   : '16px',
+          padding        : '40px',
+          textAlign      : 'center',
+          border         : `1px solid ${theme.border}`
+        }}>
+          <p style={{ fontSize: '32px', marginBottom: '8px' }}>📦</p>
+          <p style={{ color: theme.textSecondary, fontSize: '14px' }}>
+            No items found
+          </p>
+        </div>
+      ) : isMobile ? (
+        // ── MOBILE CARD VIEW ──
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {filteredItems.map((item) => {
+            const status   = getStatus(item)
+            const catIcon  = getCategoryIcon(item.category)
+            return (
+              <div key={item.id} style={{
+                backgroundColor: theme.cardBg,
+                borderRadius   : '16px',
+                padding        : '16px',
+                border         : `1px solid ${theme.border}`,
+                boxShadow      : theme.shadowSm
+              }}>
+                <div style={{
+                  display        : 'flex',
+                  justifyContent : 'space-between',
+                  alignItems     : 'flex-start'
+                }}>
+                  {/* Left */}
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                    <div style={{
+                      width          : '44px',
+                      height         : '44px',
+                      borderRadius   : '12px',
+                      backgroundColor: catIcon.bg,
+                      display        : 'flex',
+                      alignItems     : 'center',
+                      justifyContent : 'center',
+                      fontSize       : '20px',
+                      flexShrink     : 0
+                    }}>
+                      {catIcon.icon}
+                    </div>
+                    <div>
+                      <p style={{
+                        fontSize  : '15px',
+                        fontWeight: '700',
+                        color     : theme.textPrimary
+                      }}>
+                        {item.name}
+                      </p>
+                      <p style={{
+                        fontSize : '12px',
+                        color    : theme.textSecondary,
+                        marginTop: '2px'
+                      }}>
+                        {item.box_name ? `${item.box_name} • ` : ''}{item.category}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Status badge */}
+                  <span style={{
+                    backgroundColor: status.bg,
+                    color          : status.color,
+                    padding        : '4px 10px',
+                    borderRadius   : '20px',
+                    fontSize       : '11px',
+                    fontWeight     : '700',
+                    flexShrink     : 0
+                  }}>
+                    {status.label}
+                  </span>
+                </div>
+
+                {/* Weight info */}
+                <div style={{
+                  display        : 'flex',
+                  gap            : '16px',
+                  marginTop      : '14px',
+                  paddingTop     : '14px',
+                  borderTop      : `1px solid ${theme.border}`
+                }}>
+                  <div>
+                    <p style={{ fontSize: '11px', color: theme.textSecondary }}>
+                      Net Weight
+                    </p>
+                    <p style={{
+                      fontSize  : '16px',
+                      fontWeight: '800',
+                      color     : catIcon.color
+                    }}>
+                      {item.net_weight_g}g
+                    </p>
+                  </div>
+                  {item.category !== 'Gold' && (
+                    <div>
+                      <p style={{ fontSize: '11px', color: theme.textSecondary }}>
+                        Box Weight
+                      </p>
+                      <p style={{
+                        fontSize  : '16px',
+                        fontWeight: '700',
+                        color     : theme.textPrimary
+                      }}>
+                        {item.box_weight_g}g
+                      </p>
+                    </div>
+                  )}
+                  <div>
+                    <p style={{ fontSize: '11px', color: theme.textSecondary }}>
+                      Reorder At
+                    </p>
+                    <p style={{
+                      fontSize  : '16px',
+                      fontWeight: '700',
+                      color     : theme.textPrimary
+                    }}>
+                      {item.reorder_weight_g}g
+                    </p>
+                  </div>
+                </div>
+
+                {/* Action buttons */}
+                <div style={{
+                  display  : 'flex',
+                  gap      : '8px',
+                  marginTop: '12px'
+                }}>
+                  <button
+                    onClick={() => handleEditClick(item)}
+                    style={{
+                      flex           : 1,
+                      padding        : '8px',
+                      borderRadius   : '10px',
+                      border         : `1px solid ${theme.border}`,
+                      backgroundColor: theme.headerBg,
+                      color          : theme.textPrimary,
+                      fontSize       : '13px',
+                      fontWeight     : '600',
+                      cursor         : 'pointer'
+                    }}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(item.id)}
+                    style={{
+                      flex           : 1,
+                      padding        : '8px',
+                      borderRadius   : '10px',
+                      border         : 'none',
+                      backgroundColor: '#fee2e2',
+                      color          : '#dc2626',
+                      fontSize       : '13px',
+                      fontWeight     : '600',
+                      cursor         : 'pointer'
+                    }}
+                  >
+                    Delete
+                  </button>
+                </div>
+
+              </div>
+            )
+          })}
+        </div>
+      ) : (
+        // ── DESKTOP TABLE VIEW ──
+        <div style={{
+          backgroundColor: theme.cardBg,
+          borderRadius   : '16px',
+          padding        : '24px',
+          boxShadow      : theme.shadowSm,
+          border         : `1px solid ${theme.border}`,
+          overflowX      : 'auto'
+        }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
-              <tr style={styles.tableHeader}>
-                <th style={styles.th}>Item Name</th>
-                <th style={styles.th}>Category</th>
-                <th style={styles.th}>Box Name</th>
-                <th style={styles.th}>Total Wt (g)</th>
-                <th style={styles.th}>Box Wt (g)</th>
-                <th style={styles.th}>Net Wt (g)</th>
-                <th style={styles.th}>Reorder (g)</th>
-                <th style={styles.th}>Status</th>
-                <th style={styles.th}>Actions</th>
+              <tr style={{ backgroundColor: theme.headerBg }}>
+                {['Item Name','Category','Box Name','Total Wt','Box Wt','Net Wt','Reorder','Status','Actions'].map(h => (
+                  <th key={h} style={{
+                    padding     : '12px 16px',
+                    textAlign   : 'left',
+                    fontSize    : '13px',
+                    fontWeight  : '600',
+                    color       : theme.textSecondary,
+                    borderBottom: `1px solid ${theme.border}`
+                  }}>
+                    {h}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {items.map((item) => {
-                const status = getStatus(item)
+              {filteredItems.map((item) => {
+                const status  = getStatus(item)
+                const catIcon = getCategoryIcon(item.category)
                 return (
-                  <tr key={item.id} style={styles.tableRow}>
-                    <td style={styles.td}>{item.name}</td>
-                    <td style={styles.td}>{item.category}</td>
-                    <td style={styles.td}>
-                      {item.category === 'Silver' ? item.box_name || '—' : '—'}
+                  <tr key={item.id} style={{ borderBottom: `1px solid ${theme.border}` }}>
+                    <td style={{ padding: '14px 16px', fontSize: '14px', fontWeight: '600', color: theme.textPrimary }}>
+                      {item.name}
                     </td>
-                    <td style={styles.td}>{item.total_weight_g} g</td>
-                    <td style={styles.td}>
-                      {item.category === 'Silver' ? `${item.box_weight_g} g` : '—'}
+                    <td style={{ padding: '14px 16px', fontSize: '14px', color: theme.textPrimary }}>
+                      <span style={{
+                        backgroundColor: catIcon.bg,
+                        color          : catIcon.color,
+                        padding        : '4px 10px',
+                        borderRadius   : '20px',
+                        fontSize       : '12px',
+                        fontWeight     : '600'
+                      }}>
+                        {item.category}
+                      </span>
                     </td>
-                    <td style={{ ...styles.td, fontWeight: '600' }}>{item.net_weight_g} g</td>
-                    <td style={styles.td}>{item.reorder_weight_g} g</td>
-                    <td style={styles.td}>
-                      <span style={{ ...styles.statusBadge, backgroundColor: status.color }}>
+                    <td style={{ padding: '14px 16px', fontSize: '14px', color: theme.textPrimary }}>
+                      {item.category !== 'Gold' ? item.box_name || '—' : '—'}
+                    </td>
+                    <td style={{ padding: '14px 16px', fontSize: '14px', color: theme.textPrimary }}>
+                      {item.total_weight_g}g
+                    </td>
+                    <td style={{ padding: '14px 16px', fontSize: '14px', color: theme.textPrimary }}>
+                      {item.category !== 'Gold' ? `${item.box_weight_g}g` : '—'}
+                    </td>
+                    <td style={{ padding: '14px 16px', fontSize: '14px', fontWeight: '700', color: catIcon.color }}>
+                      {item.net_weight_g}g
+                    </td>
+                    <td style={{ padding: '14px 16px', fontSize: '14px', color: theme.textPrimary }}>
+                      {item.reorder_weight_g}g
+                    </td>
+                    <td style={{ padding: '14px 16px' }}>
+                      <span style={{
+                        backgroundColor: status.bg,
+                        color          : status.color,
+                        padding        : '4px 10px',
+                        borderRadius   : '20px',
+                        fontSize       : '12px',
+                        fontWeight     : '700'
+                      }}>
                         {status.label}
                       </span>
                     </td>
-                    <td style={styles.td}>
-                      <button style={styles.editButton} onClick={() => handleEditClick(item)}>Edit</button>
-                      <button style={styles.deleteButton} onClick={() => handleDelete(item.id)}>Delete</button>
+                    <td style={{ padding: '14px 16px' }}>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button
+                          onClick={() => handleEditClick(item)}
+                          style={{
+                            backgroundColor: '#f59e0b',
+                            color          : 'white',
+                            border         : 'none',
+                            padding        : '6px 14px',
+                            borderRadius   : '8px',
+                            fontSize       : '13px',
+                            cursor         : 'pointer',
+                            fontWeight     : '600'
+                          }}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(item.id)}
+                          style={{
+                            backgroundColor: '#ef4444',
+                            color          : 'white',
+                            border         : 'none',
+                            padding        : '6px 14px',
+                            borderRadius   : '8px',
+                            fontSize       : '13px',
+                            cursor         : 'pointer',
+                            fontWeight     : '600'
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 )
               })}
             </tbody>
           </table>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* ── Add/Edit Form Modal ── */}
+      {showForm && (
+        <div style={{
+          position       : 'fixed',
+          inset          : 0,
+          backgroundColor: 'rgba(0,0,0,0.6)',
+          zIndex         : 500,
+          display        : 'flex',
+          alignItems     : isMobile ? 'flex-end' : 'center',
+          justifyContent : 'center',
+          backdropFilter : 'blur(4px)'
+        }}>
+          <div style={{
+            backgroundColor: theme.cardBg,
+            borderRadius   : isMobile ? '24px 24px 0 0' : '20px',
+            padding        : '24px',
+            width          : isMobile ? '100%' : '480px',
+            maxHeight      : '90vh',
+            overflowY      : 'auto',
+            boxShadow      : theme.shadowCard
+          }}>
+
+            {/* Form Header */}
+            <div style={{
+              display        : 'flex',
+              justifyContent : 'space-between',
+              alignItems     : 'center',
+              marginBottom   : '20px'
+            }}>
+              <h2 style={{
+                fontSize  : '18px',
+                fontWeight: '800',
+                color     : theme.textPrimary
+              }}>
+                {editItem ? 'Edit Item' : 'Add Stock Item'}
+              </h2>
+              <button
+                onClick={() => { setShowForm(false); setEditItem(null) }}
+                style={{
+                  width          : '32px',
+                  height         : '32px',
+                  borderRadius   : '50%',
+                  border         : 'none',
+                  backgroundColor: theme.headerBg,
+                  color          : theme.textSecondary,
+                  fontSize       : '16px',
+                  cursor         : 'pointer',
+                  display        : 'flex',
+                  alignItems     : 'center',
+                  justifyContent : 'center'
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Form Fields */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+
+              <div>
+                <label style={{
+                  fontSize    : '13px',
+                  fontWeight  : '600',
+                  color       : theme.textSecondary,
+                  marginBottom: '6px',
+                  display     : 'block'
+                }}>
+                  Item Name *
+                </label>
+                <input
+                  style={{
+                    width          : '100%',
+                    padding        : '12px 14px',
+                    borderRadius   : '12px',
+                    border         : `1px solid ${theme.borderInput}`,
+                    fontSize       : '14px',
+                    outline        : 'none',
+                    backgroundColor: theme.inputBg,
+                    color          : theme.textPrimary,
+                    boxSizing      : 'border-box'
+                  }}
+                  name="name"
+                  placeholder="e.g. Gold Chain"
+                  value={form.name}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div>
+                <label style={{
+                  fontSize    : '13px',
+                  fontWeight  : '600',
+                  color       : theme.textSecondary,
+                  marginBottom: '6px',
+                  display     : 'block'
+                }}>
+                  Category *
+                </label>
+                <select
+                  style={{
+                    width          : '100%',
+                    padding        : '12px 14px',
+                    borderRadius   : '12px',
+                    border         : `1px solid ${theme.borderInput}`,
+                    fontSize       : '14px',
+                    outline        : 'none',
+                    backgroundColor: theme.inputBg,
+                    color          : theme.textPrimary,
+                    boxSizing      : 'border-box'
+                  }}
+                  name="category"
+                  value={form.category}
+                  onChange={handleCategoryChange}
+                >
+                  <option value="Gold">Gold</option>
+                  <option value="Silver">Silver</option>
+                  <option value="Pattilu">Pattilu</option>
+                </select>
+              </div>
+
+              {form.category !== 'Gold' && (
+                <div>
+                  <label style={{
+                    fontSize    : '13px',
+                    fontWeight  : '600',
+                    color       : theme.textSecondary,
+                    marginBottom: '6px',
+                    display     : 'block'
+                  }}>
+                    Box Name
+                  </label>
+                  <input
+                    style={{
+                      width          : '100%',
+                      padding        : '12px 14px',
+                      borderRadius   : '12px',
+                      border         : `1px solid ${theme.borderInput}`,
+                      fontSize       : '14px',
+                      outline        : 'none',
+                      backgroundColor: theme.inputBg,
+                      color          : theme.textPrimary,
+                      boxSizing      : 'border-box'
+                    }}
+                    name="box_name"
+                    placeholder="e.g. Box A"
+                    value={form.box_name}
+                    onChange={handleChange}
+                  />
+                </div>
+              )}
+
+              <div>
+                <label style={{
+                  fontSize    : '13px',
+                  fontWeight  : '600',
+                  color       : theme.textSecondary,
+                  marginBottom: '6px',
+                  display     : 'block'
+                }}>
+                  {form.category === 'Gold' ? 'Weight (g) *' : 'Total Weight (g) * — box + items'}
+                </label>
+                <input
+                  style={{
+                    width          : '100%',
+                    padding        : '12px 14px',
+                    borderRadius   : '12px',
+                    border         : `1px solid ${theme.borderInput}`,
+                    fontSize       : '14px',
+                    outline        : 'none',
+                    backgroundColor: theme.inputBg,
+                    color          : theme.textPrimary,
+                    boxSizing      : 'border-box'
+                  }}
+                  name="total_weight_g"
+                  type="number"
+                  placeholder="Weight in grams"
+                  value={form.total_weight_g}
+                  onChange={handleChange}
+                />
+              </div>
+
+              {form.category !== 'Gold' && (
+                <div>
+                  <label style={{
+                    fontSize    : '13px',
+                    fontWeight  : '600',
+                    color       : theme.textSecondary,
+                    marginBottom: '6px',
+                    display     : 'block'
+                  }}>
+                    Box Weight (g) *
+                  </label>
+                  <input
+                    style={{
+                      width          : '100%',
+                      padding        : '12px 14px',
+                      borderRadius   : '12px',
+                      border         : `1px solid ${theme.borderInput}`,
+                      fontSize       : '14px',
+                      outline        : 'none',
+                      backgroundColor: theme.inputBg,
+                      color          : theme.textPrimary,
+                      boxSizing      : 'border-box'
+                    }}
+                    name="box_weight_g"
+                    type="number"
+                    placeholder="Empty box weight"
+                    value={form.box_weight_g}
+                    onChange={handleChange}
+                  />
+                </div>
+              )}
+
+              {/* Net Weight Preview */}
+              {netWeightPreview && (
+                <div style={{
+                  backgroundColor: isDark ? '#052e16' : '#f0fdf4',
+                  borderRadius   : '12px',
+                  padding        : '12px 14px',
+                  border         : '1px solid #bbf7d0'
+                }}>
+                  <p style={{ fontSize: '13px', color: '#10b981', fontWeight: '600' }}>
+                    Net Weight = <strong>{netWeightPreview}g</strong>
+                  </p>
+                </div>
+              )}
+
+              <div>
+                <label style={{
+                  fontSize    : '13px',
+                  fontWeight  : '600',
+                  color       : theme.textSecondary,
+                  marginBottom: '6px',
+                  display     : 'block'
+                }}>
+                  Reorder Alert (g)
+                </label>
+                <input
+                  style={{
+                    width          : '100%',
+                    padding        : '12px 14px',
+                    borderRadius   : '12px',
+                    border         : `1px solid ${theme.borderInput}`,
+                    fontSize       : '14px',
+                    outline        : 'none',
+                    backgroundColor: theme.inputBg,
+                    color          : theme.textPrimary,
+                    boxSizing      : 'border-box'
+                  }}
+                  name="reorder_weight_g"
+                  type="number"
+                  placeholder="Alert when below this"
+                  value={form.reorder_weight_g}
+                  onChange={handleChange}
+                />
+              </div>
+
+            </div>
+
+            {/* Form Buttons */}
+            <div style={{
+              display  : 'flex',
+              gap      : '10px',
+              marginTop: '20px'
+            }}>
+              <button
+                onClick={editItem ? handleUpdate : handleAdd}
+                style={{
+                  flex           : 1,
+                  padding        : '14px',
+                  borderRadius   : '12px',
+                  border         : 'none',
+                  backgroundColor: '#1a1a2e',
+                  color          : 'white',
+                  fontSize       : '15px',
+                  fontWeight     : '700',
+                  cursor         : 'pointer'
+                }}
+              >
+                {editItem ? 'Update Item' : 'Save Item'}
+              </button>
+              <button
+                onClick={() => { setShowForm(false); setEditItem(null) }}
+                style={{
+                  padding        : '14px 20px',
+                  borderRadius   : '12px',
+                  border         : `1px solid ${theme.borderInput}`,
+                  backgroundColor: theme.headerBg,
+                  color          : theme.textPrimary,
+                  fontSize       : '15px',
+                  fontWeight     : '600',
+                  cursor         : 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
 
     </div>
   )
 }
-
-
 
 export default Stock
