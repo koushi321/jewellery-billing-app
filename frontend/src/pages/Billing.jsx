@@ -781,7 +781,7 @@ function Billing() {
               </span>
               <span style={{
                 ...styles.grandTotalValue,
-                color: savedBill.grand_total < 0 ? '#dc2626' : '#1a1a2e'
+                color: savedBill.grand_total < 0 ? '#dc2626' : '#10b981'
               }}>
                 {formatCurrency(Math.abs(savedBill.grand_total))}
               </span>
