@@ -321,279 +321,6 @@ function GoldLoan() {
   // ── PRINT ──────────────────────────────────────────────
   const handlePrint = () => window.print()
 
-  // ── LOAN DETAIL VIEW ───────────────────────────────────
-  if (selectedLoan) {
-    const { loan, payments, calculation } = selectedLoan
-
-    return (
-      <div>
-        <button style={styles.backButton} onClick={() => setSelectedLoan(null)}>
-          Back to Loans
-        </button>
-
-        {error   && <div style={styles.error}>{error}</div>}
-        {success && <div style={styles.successMsg}>{success}</div>}
-
-        <div style={styles.loanCard}>
-
-          {/* ── Header ── */}
-          <div style={styles.loanCardHeader}>
-            <div>
-              <h1 style={styles.shopName}>Palivella Jewellery</h1>
-              <p style={styles.loanCardSub}>Gold Loan Card</p>
-            </div>
-            <div style={styles.loanCardMeta}>
-              <p style={styles.loanCardMetaText}>
-                Loan ID: <strong>{loan.person_id}</strong>
-              </p>
-              <p style={styles.loanCardMetaText}>
-                Date: <strong>{loan.loan_date}</strong>
-              </p>
-              <span style={{
-                ...styles.statusBadge,
-                backgroundColor: loan.status === 'active' ? '#16a34a' : '#6b7280'
-              }}>
-                {loan.status.toUpperCase()}
-              </span>
-            </div>
-          </div>
-
-          <div style={styles.divider} />
-
-          {/* ── Customer & Gold Details ── */}
-          <div style={styles.loanDetailGrid}>
-            <div style={styles.detailSection}>
-              <h3 style={styles.detailSectionTitle}>Customer Details</h3>
-              <div style={styles.detailRow}>
-                <span style={styles.detailLabel}>Name</span>
-                <span style={styles.detailValue}>{loan.person_name}</span>
-              </div>
-              <div style={styles.detailRow}>
-                <span style={styles.detailLabel}>Phone</span>
-                <span style={styles.detailValue}>{loan.phone || '—'}</span>
-              </div>
-              <div style={styles.detailRow}>
-                <span style={styles.detailLabel}>Address</span>
-                <span style={styles.detailValue}>{loan.address || '—'}</span>
-              </div>
-              {loan.due_date && (
-                <div style={styles.detailRow}>
-                  <span style={styles.detailLabel}>Due Date</span>
-                  <span style={styles.detailValue}>{loan.due_date}</span>
-                </div>
-              )}
-            </div>
-
-            <div style={styles.detailSection}>
-              <h3 style={styles.detailSectionTitle}>Gold Details</h3>
-              <div style={styles.detailRow}>
-                <span style={styles.detailLabel}>Gross Weight</span>
-                <span style={styles.detailValue}>{loan.gold_weight_g} g</span>
-              </div>
-              {loan.net_weight_g > 0 && (
-                <div style={styles.detailRow}>
-                  <span style={styles.detailLabel}>Net Weight</span>
-                  <span style={styles.detailValue}>{loan.net_weight_g} g</span>
-                </div>
-              )}
-              <div style={styles.detailRow}>
-                <span style={styles.detailLabel}>Purity</span>
-                <span style={styles.detailValue}>{loan.gold_purity}</span>
-              </div>
-              <div style={styles.detailRow}>
-                <span style={styles.detailLabel}>Gold Value</span>
-                <span style={styles.detailValue}>{formatCurrency(loan.gold_value)}</span>
-              </div>
-              {loan.notes && (
-                <div style={styles.detailRow}>
-                  <span style={styles.detailLabel}>Notes</span>
-                  <span style={styles.detailValue}>{loan.notes}</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div style={styles.divider} />
-
-          {/* ── Interest Calculation ── */}
-          <h3 style={styles.detailSectionTitle}>Interest Calculation</h3>
-
-          {/* Date Range */}
-          <div style={styles.dateRangeBox}>
-            <div style={styles.dateRangeItem}>
-              <span style={styles.dateRangeLabel}>Loan Start Date</span>
-              <span style={styles.dateRangeValue}>{loan.loan_date}</span>
-            </div>
-            <div style={styles.dateRangeArrow}>→</div>
-            <div style={styles.dateRangeItem}>
-              <span style={styles.dateRangeLabel}>
-                {calculation.isClosedLoan ? 'Closed Date' : 'Today'}
-              </span>
-              <span style={styles.dateRangeValue}>{calculation.endDate}</span>
-            </div>
-            <div style={styles.dateRangeArrow}>→</div>
-            <div style={styles.dateRangeItem}>
-              <span style={styles.dateRangeLabel}>Duration</span>
-              <span style={styles.dateRangeValue}>
-                {calculation.diffDays} days ({calculation.months} months)
-              </span>
-            </div>
-          </div>
-
-          {/* Calc Cards */}
-          <div style={styles.calcGrid}>
-            <div style={styles.calcCard}>
-              <p style={styles.calcLabel}>Loan Amount</p>
-              <p style={styles.calcValue}>{formatCurrency(loan.loan_amount)}</p>
-            </div>
-            <div style={styles.calcCard}>
-              <p style={styles.calcLabel}>Interest Rate</p>
-              <p style={styles.calcValue}>{loan.interest_rate}% / month</p>
-            </div>
-            <div style={styles.calcCard}>
-              <p style={styles.calcLabel}>Interest Amount</p>
-              <p style={{ ...styles.calcValue, color: '#f59e0b' }}>
-                {formatCurrency(calculation.interest)}
-              </p>
-            </div>
-          </div>
-
-          {/* Final Amount Breakdown */}
-          <div style={styles.finalAmountBox}>
-            <div style={styles.finalAmountRow}>
-              <span style={styles.finalAmountLabel}>Loan Amount</span>
-              <span style={styles.finalAmountValue}>
-                {formatCurrency(loan.loan_amount)}
-              </span>
-            </div>
-            <div style={styles.finalAmountRow}>
-              <span style={styles.finalAmountLabel}>
-                Interest ({loan.interest_rate}% × {calculation.months} months)
-              </span>
-              <span style={{ ...styles.finalAmountValue, color: '#f59e0b' }}>
-                + {formatCurrency(calculation.interest)}
-              </span>
-            </div>
-            {calculation.totalPaid > 0 && (
-              <div style={styles.finalAmountRow}>
-                <span style={styles.finalAmountLabel}>Amount Already Paid</span>
-                <span style={{ ...styles.finalAmountValue, color: '#16a34a' }}>
-                  - {formatCurrency(calculation.totalPaid)}
-                </span>
-              </div>
-            )}
-            <div style={styles.totalDueBox}>
-              <span style={styles.totalDueLabel}>
-                {calculation.isClosedLoan ? 'Final Amount (Closed)' : 'Total Amount Due'}
-              </span>
-              <span style={styles.totalDueValue}>
-                {formatCurrency(calculation.totalDue)}
-              </span>
-            </div>
-          </div>
-
-          {/* ── Payment History ── */}
-          {payments.length > 0 && (
-            <>
-              <div style={styles.divider} />
-              <h3 style={styles.detailSectionTitle}>Payment History</h3>
-              <table style={styles.table}>
-                <thead>
-                  <tr style={styles.tableHeader}>
-                    <th style={styles.th}>Date</th>
-                    <th style={styles.th}>Amount Paid</th>
-                    <th style={styles.th}>Notes</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {payments.map((payment) => (
-                    <tr key={payment.id} style={styles.tableRow}>
-                      <td style={styles.td}>{payment.payment_date}</td>
-                      <td style={{ ...styles.td, color: '#16a34a', fontWeight: '600' }}>
-                        {formatCurrency(payment.amount_paid)}
-                      </td>
-                      <td style={styles.td}>{payment.notes || '—'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </>
-          )}
-
-        </div>
-
-        {/* ── Action Buttons ── */}
-        {loan.status === 'active' && (
-          <div style={styles.actionButtons}>
-            {!showPayment ? (
-              <button style={styles.paymentButton} onClick={() => setShowPayment(true)}>
-                Record Payment
-              </button>
-            ) : (
-              <div style={styles.paymentForm}>
-                <h3 style={styles.paymentFormTitle}>Record Payment</h3>
-                <div style={styles.paymentGrid}>
-                  <div style={styles.inputGroup}>
-                    <label style={styles.label}>Amount Paid (₹) *</label>
-                    <input
-                      style={styles.input}
-                      type="number"
-                      placeholder="Enter amount"
-                      value={paymentForm.amount_paid}
-                      onChange={e => setPaymentForm(p => ({ ...p, amount_paid: e.target.value }))}
-                    />
-                  </div>
-                  <div style={styles.inputGroup}>
-                    <label style={styles.label}>Payment Date *</label>
-                    <input
-                      style={styles.input}
-                      type="date"
-                      value={paymentForm.payment_date}
-                      onChange={e => setPaymentForm(p => ({ ...p, payment_date: e.target.value }))}
-                    />
-                  </div>
-                  <div style={styles.inputGroup}>
-                    <label style={styles.label}>Notes</label>
-                    <input
-                      style={styles.input}
-                      placeholder="Optional notes"
-                      value={paymentForm.notes}
-                      onChange={e => setPaymentForm(p => ({ ...p, notes: e.target.value }))}
-                    />
-                  </div>
-                </div>
-                <div style={styles.paymentActions}>
-                  <button style={styles.saveButton} onClick={handleRecordPayment}>
-                    Save Payment
-                  </button>
-                  <button style={styles.cancelButton} onClick={() => setShowPayment(false)}>
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            )}
-            <button style={styles.closeButton} onClick={() => handleCloseLoan(loan.person_id)}>
-              Close Loan
-            </button>
-            <button style={styles.printButton} onClick={handlePrint}>
-              Print Loan Card
-            </button>
-          </div>
-        )}
-
-        {loan.status === 'closed' && (
-          <div style={styles.actionButtons}>
-            <button style={styles.printButton} onClick={handlePrint}>
-              Print Loan Card
-            </button>
-          </div>
-        )}
-
-      </div>
-    )
-  }
-
-  // ── MAIN RENDER ────────────────────────────────────────
   const styles = {
   pageHeader: {
     display       : 'flex',
@@ -1102,6 +829,283 @@ function GoldLoan() {
     gap    : '12px'
   }
 }
+ 
+ 
+ 
+  // ── LOAN DETAIL VIEW ───────────────────────────────────
+  if (selectedLoan) {
+    const { loan, payments, calculation } = selectedLoan
+
+    return (
+      <div>
+        <button style={styles.backButton} onClick={() => setSelectedLoan(null)}>
+          Back to Loans
+        </button>
+
+        {error   && <div style={styles.error}>{error}</div>}
+        {success && <div style={styles.successMsg}>{success}</div>}
+
+        <div style={styles.loanCard}>
+
+          {/* ── Header ── */}
+          <div style={styles.loanCardHeader}>
+            <div>
+              <h1 style={styles.shopName}>Palivella Jewellery</h1>
+              <p style={styles.loanCardSub}>Gold Loan Card</p>
+            </div>
+            <div style={styles.loanCardMeta}>
+              <p style={styles.loanCardMetaText}>
+                Loan ID: <strong>{loan.person_id}</strong>
+              </p>
+              <p style={styles.loanCardMetaText}>
+                Date: <strong>{loan.loan_date}</strong>
+              </p>
+              <span style={{
+                ...styles.statusBadge,
+                backgroundColor: loan.status === 'active' ? '#16a34a' : '#6b7280'
+              }}>
+                {loan.status.toUpperCase()}
+              </span>
+            </div>
+          </div>
+
+          <div style={styles.divider} />
+
+          {/* ── Customer & Gold Details ── */}
+          <div style={styles.loanDetailGrid}>
+            <div style={styles.detailSection}>
+              <h3 style={styles.detailSectionTitle}>Customer Details</h3>
+              <div style={styles.detailRow}>
+                <span style={styles.detailLabel}>Name</span>
+                <span style={styles.detailValue}>{loan.person_name}</span>
+              </div>
+              <div style={styles.detailRow}>
+                <span style={styles.detailLabel}>Phone</span>
+                <span style={styles.detailValue}>{loan.phone || '—'}</span>
+              </div>
+              <div style={styles.detailRow}>
+                <span style={styles.detailLabel}>Address</span>
+                <span style={styles.detailValue}>{loan.address || '—'}</span>
+              </div>
+              {loan.due_date && (
+                <div style={styles.detailRow}>
+                  <span style={styles.detailLabel}>Due Date</span>
+                  <span style={styles.detailValue}>{loan.due_date}</span>
+                </div>
+              )}
+            </div>
+
+            <div style={styles.detailSection}>
+              <h3 style={styles.detailSectionTitle}>Gold Details</h3>
+              <div style={styles.detailRow}>
+                <span style={styles.detailLabel}>Gross Weight</span>
+                <span style={styles.detailValue}>{loan.gold_weight_g} g</span>
+              </div>
+              {loan.net_weight_g > 0 && (
+                <div style={styles.detailRow}>
+                  <span style={styles.detailLabel}>Net Weight</span>
+                  <span style={styles.detailValue}>{loan.net_weight_g} g</span>
+                </div>
+              )}
+              <div style={styles.detailRow}>
+                <span style={styles.detailLabel}>Purity</span>
+                <span style={styles.detailValue}>{loan.gold_purity}</span>
+              </div>
+              <div style={styles.detailRow}>
+                <span style={styles.detailLabel}>Gold Value</span>
+                <span style={styles.detailValue}>{formatCurrency(loan.gold_value)}</span>
+              </div>
+              {loan.notes && (
+                <div style={styles.detailRow}>
+                  <span style={styles.detailLabel}>Notes</span>
+                  <span style={styles.detailValue}>{loan.notes}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div style={styles.divider} />
+
+          {/* ── Interest Calculation ── */}
+          <h3 style={styles.detailSectionTitle}>Interest Calculation</h3>
+
+          {/* Date Range */}
+          <div style={styles.dateRangeBox}>
+            <div style={styles.dateRangeItem}>
+              <span style={styles.dateRangeLabel}>Loan Start Date</span>
+              <span style={styles.dateRangeValue}>{loan.loan_date}</span>
+            </div>
+            <div style={styles.dateRangeArrow}>→</div>
+            <div style={styles.dateRangeItem}>
+              <span style={styles.dateRangeLabel}>
+                {calculation.isClosedLoan ? 'Closed Date' : 'Today'}
+              </span>
+              <span style={styles.dateRangeValue}>{calculation.endDate}</span>
+            </div>
+            <div style={styles.dateRangeArrow}>→</div>
+            <div style={styles.dateRangeItem}>
+              <span style={styles.dateRangeLabel}>Duration</span>
+              <span style={styles.dateRangeValue}>
+                {calculation.diffDays} days ({calculation.months} months)
+              </span>
+            </div>
+          </div>
+
+          {/* Calc Cards */}
+          <div style={styles.calcGrid}>
+            <div style={styles.calcCard}>
+              <p style={styles.calcLabel}>Loan Amount</p>
+              <p style={styles.calcValue}>{formatCurrency(loan.loan_amount)}</p>
+            </div>
+            <div style={styles.calcCard}>
+              <p style={styles.calcLabel}>Interest Rate</p>
+              <p style={styles.calcValue}>{loan.interest_rate}% / month</p>
+            </div>
+            <div style={styles.calcCard}>
+              <p style={styles.calcLabel}>Interest Amount</p>
+              <p style={{ ...styles.calcValue, color: '#f59e0b' }}>
+                {formatCurrency(calculation.interest)}
+              </p>
+            </div>
+          </div>
+
+          {/* Final Amount Breakdown */}
+          <div style={styles.finalAmountBox}>
+            <div style={styles.finalAmountRow}>
+              <span style={styles.finalAmountLabel}>Loan Amount</span>
+              <span style={styles.finalAmountValue}>
+                {formatCurrency(loan.loan_amount)}
+              </span>
+            </div>
+            <div style={styles.finalAmountRow}>
+              <span style={styles.finalAmountLabel}>
+                Interest ({loan.interest_rate}% × {calculation.months} months)
+              </span>
+              <span style={{ ...styles.finalAmountValue, color: '#f59e0b' }}>
+                + {formatCurrency(calculation.interest)}
+              </span>
+            </div>
+            {calculation.totalPaid > 0 && (
+              <div style={styles.finalAmountRow}>
+                <span style={styles.finalAmountLabel}>Amount Already Paid</span>
+                <span style={{ ...styles.finalAmountValue, color: '#16a34a' }}>
+                  - {formatCurrency(calculation.totalPaid)}
+                </span>
+              </div>
+            )}
+            <div style={styles.totalDueBox}>
+              <span style={styles.totalDueLabel}>
+                {calculation.isClosedLoan ? 'Final Amount (Closed)' : 'Total Amount Due'}
+              </span>
+              <span style={styles.totalDueValue}>
+                {formatCurrency(calculation.totalDue)}
+              </span>
+            </div>
+          </div>
+
+          {/* ── Payment History ── */}
+          {payments.length > 0 && (
+            <>
+              <div style={styles.divider} />
+              <h3 style={styles.detailSectionTitle}>Payment History</h3>
+              <table style={styles.table}>
+                <thead>
+                  <tr style={styles.tableHeader}>
+                    <th style={styles.th}>Date</th>
+                    <th style={styles.th}>Amount Paid</th>
+                    <th style={styles.th}>Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {payments.map((payment) => (
+                    <tr key={payment.id} style={styles.tableRow}>
+                      <td style={styles.td}>{payment.payment_date}</td>
+                      <td style={{ ...styles.td, color: '#16a34a', fontWeight: '600' }}>
+                        {formatCurrency(payment.amount_paid)}
+                      </td>
+                      <td style={styles.td}>{payment.notes || '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </>
+          )}
+
+        </div>
+
+        {/* ── Action Buttons ── */}
+        {loan.status === 'active' && (
+          <div style={styles.actionButtons}>
+            {!showPayment ? (
+              <button style={styles.paymentButton} onClick={() => setShowPayment(true)}>
+                Record Payment
+              </button>
+            ) : (
+              <div style={styles.paymentForm}>
+                <h3 style={styles.paymentFormTitle}>Record Payment</h3>
+                <div style={styles.paymentGrid}>
+                  <div style={styles.inputGroup}>
+                    <label style={styles.label}>Amount Paid (₹) *</label>
+                    <input
+                      style={styles.input}
+                      type="number"
+                      placeholder="Enter amount"
+                      value={paymentForm.amount_paid}
+                      onChange={e => setPaymentForm(p => ({ ...p, amount_paid: e.target.value }))}
+                    />
+                  </div>
+                  <div style={styles.inputGroup}>
+                    <label style={styles.label}>Payment Date *</label>
+                    <input
+                      style={styles.input}
+                      type="date"
+                      value={paymentForm.payment_date}
+                      onChange={e => setPaymentForm(p => ({ ...p, payment_date: e.target.value }))}
+                    />
+                  </div>
+                  <div style={styles.inputGroup}>
+                    <label style={styles.label}>Notes</label>
+                    <input
+                      style={styles.input}
+                      placeholder="Optional notes"
+                      value={paymentForm.notes}
+                      onChange={e => setPaymentForm(p => ({ ...p, notes: e.target.value }))}
+                    />
+                  </div>
+                </div>
+                <div style={styles.paymentActions}>
+                  <button style={styles.saveButton} onClick={handleRecordPayment}>
+                    Save Payment
+                  </button>
+                  <button style={styles.cancelButton} onClick={() => setShowPayment(false)}>
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+            <button style={styles.closeButton} onClick={() => handleCloseLoan(loan.person_id)}>
+              Close Loan
+            </button>
+            <button style={styles.printButton} onClick={handlePrint}>
+              Print Loan Card
+            </button>
+          </div>
+        )}
+
+        {loan.status === 'closed' && (
+          <div style={styles.actionButtons}>
+            <button style={styles.printButton} onClick={handlePrint}>
+              Print Loan Card
+            </button>
+          </div>
+        )}
+
+      </div>
+    )
+  }
+
+  // ── MAIN RENDER ────────────────────────────────────────
+  
   
   return (
     <div>

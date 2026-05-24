@@ -18,6 +18,53 @@ function Bills() {
   const [filterDate, setFilterDate]     = useState('')
   // 👆 empty string = show all bills
 
+  
+  // ── FETCH ALL BILLS ────────────────────────────────────
+  useEffect(() => {
+    let cancelled = false
+    const loadBills = async () => {
+      try {
+        setLoading(true)
+        const { data, error } = await supabase
+          .from('bills')
+          .select('*')
+          .order('created_at', { ascending: false })
+        if (error) throw error
+        if (!cancelled) setBills(data || [])
+      } catch (err) {
+        console.error(err)
+        if (!cancelled) setError('Failed to load bills')
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+    loadBills()
+    return () => { cancelled = true }
+  }, [])
+
+  // ── FILTER BILLS BY DATE ───────────────────────────────
+  // If filterDate is empty → show all bills
+  // If filterDate is set   → show only that date's bills
+  const filteredBills = filterDate
+    ? bills.filter(b => b.bill_date === filterDate)
+    : bills
+
+  // ── TOTAL OF FILTERED BILLS ────────────────────────────
+  const filteredTotal = filteredBills.reduce((sum, b) => sum + b.grand_total, 0)
+
+  // ── FORMAT CURRENCY ────────────────────────────────────
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-IN', {
+      style               : 'currency',
+      currency            : 'INR',
+      maximumFractionDigits: 2
+    }).format(amount)
+  }
+
+  // ── PRINT BILL ─────────────────────────────────────────
+  const handlePrint = () => {
+    window.print()
+  }
   const styles = {
   pageHeader: {
     display       : 'flex',
@@ -329,52 +376,6 @@ function Bills() {
     cursor         : 'pointer'
   }
 }
-  // ── FETCH ALL BILLS ────────────────────────────────────
-  useEffect(() => {
-    let cancelled = false
-    const loadBills = async () => {
-      try {
-        setLoading(true)
-        const { data, error } = await supabase
-          .from('bills')
-          .select('*')
-          .order('created_at', { ascending: false })
-        if (error) throw error
-        if (!cancelled) setBills(data || [])
-      } catch (err) {
-        console.error(err)
-        if (!cancelled) setError('Failed to load bills')
-      } finally {
-        if (!cancelled) setLoading(false)
-      }
-    }
-    loadBills()
-    return () => { cancelled = true }
-  }, [])
-
-  // ── FILTER BILLS BY DATE ───────────────────────────────
-  // If filterDate is empty → show all bills
-  // If filterDate is set   → show only that date's bills
-  const filteredBills = filterDate
-    ? bills.filter(b => b.bill_date === filterDate)
-    : bills
-
-  // ── TOTAL OF FILTERED BILLS ────────────────────────────
-  const filteredTotal = filteredBills.reduce((sum, b) => sum + b.grand_total, 0)
-
-  // ── FORMAT CURRENCY ────────────────────────────────────
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-IN', {
-      style               : 'currency',
-      currency            : 'INR',
-      maximumFractionDigits: 2
-    }).format(amount)
-  }
-
-  // ── PRINT BILL ─────────────────────────────────────────
-  const handlePrint = () => {
-    window.print()
-  }
 
   // ── RENDER SINGLE BILL VIEW ────────────────────────────
   if (selectedBill) {
