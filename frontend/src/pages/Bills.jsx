@@ -342,12 +342,12 @@ function Bills() {
   grandTotalLabel: {
     fontSize  : '16px',
     fontWeight: '700',
-    color     : theme.textPrimary
+    color     : '#f59e0b'
   },
   grandTotalValue: {
     fontSize  : '20px',
     fontWeight: '800',
-    color     : theme.textPrimary
+    color     :  '#10b981'
   },
   billFooter: {
     textAlign : 'center',
