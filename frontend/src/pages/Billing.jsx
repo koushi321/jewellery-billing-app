@@ -267,178 +267,6 @@ function Billing() {
       maximumFractionDigits: 2
     }).format(amount)
   }
-
-  // ── SAVED BILL VIEW ────────────────────────────────────
-  if (savedBill) {
-    const parsedData = typeof savedBill.items_json === 'string'
-      ? JSON.parse(savedBill.items_json)
-      : savedBill.items_json
-    const items      = parsedData.items     || []
-    const old_items  = parsedData.old_items || []
-
-    
-
-    return (
-      <div>
-        <div style={styles.billCard}>
-
-          <div style={styles.billHeader}>
-            <h1 style={styles.shopName}>Palivella Jewellery</h1>
-            <div style={styles.billMeta}>
-              <p style={styles.billMetaText}>
-                Bill No: <strong>{savedBill.bill_number}</strong>
-              </p>
-              <p style={styles.billMetaText}>
-                Date: <strong>{savedBill.bill_date}</strong>
-              </p>
-            </div>
-          </div>
-
-          <div style={styles.billDivider} />
-
-          <div style={styles.customerSection}>
-            <p style={styles.customerText}>
-              <strong>Customer:</strong> {savedBill.customer_name}
-            </p>
-            {savedBill.customer_phone && (
-              <p style={styles.customerText}>
-                <strong>Phone:</strong> {savedBill.customer_phone}
-              </p>
-            )}
-          </div>
-
-          {/* New Items */}
-          <h3 style={styles.sectionHeading}>Purchased Items</h3>
-          <table style={styles.billTable}>
-            <thead>
-              <tr style={styles.billTableHead}>
-                <th style={styles.billTh}>Item</th>
-                <th style={styles.billTh}>Type</th>
-                <th style={styles.billTh}>Actual Wt</th>
-                <th style={styles.billTh}>Bill Wt</th>
-                <th style={styles.billTh}>Rate/g</th>
-                <th style={styles.billTh}>Price</th>
-                <th style={styles.billTh}>Making</th>
-                <th style={styles.billTh}>Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((item, index) => (
-                <tr key={index} style={styles.billTableRow}>
-                  <td style={styles.billTd}>{item.item_name}</td>
-                  <td style={styles.billTd}>
-                    {item.category === 'Gold' ? item.gold_type : 'Silver'}
-                  </td>
-                  <td style={styles.billTd}>{item.actual_weight}g</td>
-                  <td style={styles.billTd}>{item.billing_weight}g</td>
-                  <td style={styles.billTd}>₹{item.rate}</td>
-                  <td style={styles.billTd}>₹{parseFloat(item.price).toFixed(2)}</td>
-                  <td style={styles.billTd}>₹{parseFloat(item.making_charges).toFixed(2)}</td>
-                  <td style={styles.billTd}>₹{parseFloat(item.total_price).toFixed(2)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          {/* Old Items */}
-          {old_items.length > 0 && (
-            <>
-              <h3 style={{ ...styles.sectionHeading, color: '#dc2626' }}>
-                Old Items Exchange
-              </h3>
-              <table style={styles.billTable}>
-                <thead>
-                  <tr style={{ ...styles.billTableHead, backgroundColor: '#dc2626' }}>
-                    <th style={styles.billTh}>Item</th>
-                    <th style={styles.billTh}>Category</th>
-                    <th style={styles.billTh}>Original Wt</th>
-                    <th style={styles.billTh}>Pure Wt</th>
-                    <th style={styles.billTh}>Rate/g</th>
-                    <th style={styles.billTh}>Value</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {old_items.map((item, index) => (
-                    <tr key={index} style={styles.billTableRow}>
-                      <td style={styles.billTd}>{item.item_name}</td>
-                      <td style={styles.billTd}>{item.category}</td>
-                      <td style={styles.billTd}>{item.original_weight}g</td>
-                      <td style={styles.billTd}>{item.pure_weight}g</td>
-                      <td style={styles.billTd}>₹{item.rate}</td>
-                      <td style={{ ...styles.billTd, color: '#dc2626', fontWeight: '700' }}>
-                        - ₹{parseFloat(item.value).toFixed(2)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </>
-          )}
-
-          {/* Bill Summary */}
-          <div style={styles.billSummary}>
-            <div style={styles.summaryRow}>
-              <span style={styles.summaryLabel}>Subtotal</span>
-              <span style={styles.summaryValue}>{formatCurrency(savedBill.subtotal)}</span>
-            </div>
-            {old_items.length > 0 && (
-  <div style={styles.summaryRow}>
-    <span style={styles.summaryLabel}>Old Items Exchange</span>
-    <span style={{ ...styles.summaryValue, color: '#dc2626' }}>
-      - {formatCurrency(
-          old_items.reduce((sum, item) => sum + parseFloat(item.value || 0), 0)
-        )}
-    </span>
-  </div>
-)}
-            {savedBill.discount > 0 && (
-              <div style={styles.summaryRow}>
-                <span style={styles.summaryLabel}>Discount</span>
-                <span style={{ ...styles.summaryValue, color: '#dc2626' }}>
-                  - {formatCurrency(savedBill.discount)}
-                </span>
-              </div>
-            )}
-            <div style={{ ...styles.summaryRow, ...styles.grandTotalRow }}>
-              <span style={styles.grandTotalLabel}>
-                {savedBill.grand_total < 0 ? 'Amount to Pay Customer' : 'Grand Total'}
-              </span>
-              <span style={{
-                ...styles.grandTotalValue,
-                color: savedBill.grand_total < 0 ? '#dc2626' : '#1a1a2e'
-              }}>
-                {formatCurrency(Math.abs(savedBill.grand_total))}
-              </span>
-            </div>
-          </div>
-
-          {savedBill.grand_total < 0 && (
-            <div style={styles.payCustomerNote}>
-              Customer should receive {formatCurrency(Math.abs(savedBill.grand_total))}
-            </div>
-          )}
-
-          <div style={styles.billFooter}>
-            <p style={styles.footerText}>Thank you for your purchase!</p>
-            <p style={styles.footerText}>Palivella Jewellery</p>
-          </div>
-
-        </div>
-
-        <div style={styles.billActions}>
-          <button style={styles.printButton} onClick={handlePrint}>
-            Print Bill
-          </button>
-          <button style={styles.newBillButton} onClick={handleNewBill}>
-            New Bill
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  // ── BILLING FORM ───────────────────────────────────────
-  
   const styles = {
   pageHeader: {
     display       : 'flex',
@@ -816,6 +644,178 @@ function Billing() {
     cursor         : 'pointer'
   }
 }
+  // ── SAVED BILL VIEW ────────────────────────────────────
+  if (savedBill) {
+    const parsedData = typeof savedBill.items_json === 'string'
+      ? JSON.parse(savedBill.items_json)
+      : savedBill.items_json
+    const items      = parsedData.items     || []
+    const old_items  = parsedData.old_items || []
+
+    
+
+    return (
+      <div>
+        <div style={styles.billCard}>
+
+          <div style={styles.billHeader}>
+            <h1 style={styles.shopName}>Palivella Jewellery</h1>
+            <div style={styles.billMeta}>
+              <p style={styles.billMetaText}>
+                Bill No: <strong>{savedBill.bill_number}</strong>
+              </p>
+              <p style={styles.billMetaText}>
+                Date: <strong>{savedBill.bill_date}</strong>
+              </p>
+            </div>
+          </div>
+
+          <div style={styles.billDivider} />
+
+          <div style={styles.customerSection}>
+            <p style={styles.customerText}>
+              <strong>Customer:</strong> {savedBill.customer_name}
+            </p>
+            {savedBill.customer_phone && (
+              <p style={styles.customerText}>
+                <strong>Phone:</strong> {savedBill.customer_phone}
+              </p>
+            )}
+          </div>
+
+          {/* New Items */}
+          <h3 style={styles.sectionHeading}>Purchased Items</h3>
+          <table style={styles.billTable}>
+            <thead>
+              <tr style={styles.billTableHead}>
+                <th style={styles.billTh}>Item</th>
+                <th style={styles.billTh}>Type</th>
+                <th style={styles.billTh}>Actual Wt</th>
+                <th style={styles.billTh}>Bill Wt</th>
+                <th style={styles.billTh}>Rate/g</th>
+                <th style={styles.billTh}>Price</th>
+                <th style={styles.billTh}>Making</th>
+                <th style={styles.billTh}>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((item, index) => (
+                <tr key={index} style={styles.billTableRow}>
+                  <td style={styles.billTd}>{item.item_name}</td>
+                  <td style={styles.billTd}>
+                    {item.category === 'Gold' ? item.gold_type : 'Silver'}
+                  </td>
+                  <td style={styles.billTd}>{item.actual_weight}g</td>
+                  <td style={styles.billTd}>{item.billing_weight}g</td>
+                  <td style={styles.billTd}>₹{item.rate}</td>
+                  <td style={styles.billTd}>₹{parseFloat(item.price).toFixed(2)}</td>
+                  <td style={styles.billTd}>₹{parseFloat(item.making_charges).toFixed(2)}</td>
+                  <td style={styles.billTd}>₹{parseFloat(item.total_price).toFixed(2)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {/* Old Items */}
+          {old_items.length > 0 && (
+            <>
+              <h3 style={{ ...styles.sectionHeading, color: '#dc2626' }}>
+                Old Items Exchange
+              </h3>
+              <table style={styles.billTable}>
+                <thead>
+                  <tr style={{ ...styles.billTableHead, backgroundColor: '#dc2626' }}>
+                    <th style={styles.billTh}>Item</th>
+                    <th style={styles.billTh}>Category</th>
+                    <th style={styles.billTh}>Original Wt</th>
+                    <th style={styles.billTh}>Pure Wt</th>
+                    <th style={styles.billTh}>Rate/g</th>
+                    <th style={styles.billTh}>Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {old_items.map((item, index) => (
+                    <tr key={index} style={styles.billTableRow}>
+                      <td style={styles.billTd}>{item.item_name}</td>
+                      <td style={styles.billTd}>{item.category}</td>
+                      <td style={styles.billTd}>{item.original_weight}g</td>
+                      <td style={styles.billTd}>{item.pure_weight}g</td>
+                      <td style={styles.billTd}>₹{item.rate}</td>
+                      <td style={{ ...styles.billTd, color: '#dc2626', fontWeight: '700' }}>
+                        - ₹{parseFloat(item.value).toFixed(2)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </>
+          )}
+
+          {/* Bill Summary */}
+          <div style={styles.billSummary}>
+            <div style={styles.summaryRow}>
+              <span style={styles.summaryLabel}>Subtotal</span>
+              <span style={styles.summaryValue}>{formatCurrency(savedBill.subtotal)}</span>
+            </div>
+            {old_items.length > 0 && (
+  <div style={styles.summaryRow}>
+    <span style={styles.summaryLabel}>Old Items Exchange</span>
+    <span style={{ ...styles.summaryValue, color: '#dc2626' }}>
+      - {formatCurrency(
+          old_items.reduce((sum, item) => sum + parseFloat(item.value || 0), 0)
+        )}
+    </span>
+  </div>
+)}
+            {savedBill.discount > 0 && (
+              <div style={styles.summaryRow}>
+                <span style={styles.summaryLabel}>Discount</span>
+                <span style={{ ...styles.summaryValue, color: '#dc2626' }}>
+                  - {formatCurrency(savedBill.discount)}
+                </span>
+              </div>
+            )}
+            <div style={{ ...styles.summaryRow, ...styles.grandTotalRow }}>
+              <span style={styles.grandTotalLabel}>
+                {savedBill.grand_total < 0 ? 'Amount to Pay Customer' : 'Grand Total'}
+              </span>
+              <span style={{
+                ...styles.grandTotalValue,
+                color: savedBill.grand_total < 0 ? '#dc2626' : '#1a1a2e'
+              }}>
+                {formatCurrency(Math.abs(savedBill.grand_total))}
+              </span>
+            </div>
+          </div>
+
+          {savedBill.grand_total < 0 && (
+            <div style={styles.payCustomerNote}>
+              Customer should receive {formatCurrency(Math.abs(savedBill.grand_total))}
+            </div>
+          )}
+
+          <div style={styles.billFooter}>
+            <p style={styles.footerText}>Thank you for your purchase!</p>
+            <p style={styles.footerText}>Palivella Jewellery</p>
+          </div>
+
+        </div>
+
+        <div style={styles.billActions}>
+          <button style={styles.printButton} onClick={handlePrint}>
+            Print Bill
+          </button>
+          <button style={styles.newBillButton} onClick={handleNewBill}>
+            New Bill
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // ── BILLING FORM ───────────────────────────────────────
+  
+  
   return (
     <div>
 
