@@ -27,6 +27,8 @@ function WeightCheck() {
   useEffect(() => {
     let cancelled = false
     const load = async () => {
+        
+
       try {
         setLoading(true)
         setError('')

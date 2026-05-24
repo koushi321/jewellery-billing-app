@@ -113,11 +113,13 @@ function Layout({ children }) {
       {!isMobile && <Sidebar />}
 
       <div style={{
-        marginLeft    : isMobile ? '0' : '240px',
-        flex          : 1,
-        minHeight     : '100vh',
-        backgroundColor: theme.pageBg,
-        width         : isMobile ? '100%' : 'auto'
+       marginLeft    : isMobile ? '0' : '240px',
+  flex          : 1,
+  minHeight     : '100vh',
+  maxHeight     : isMobile ? '100vh' : 'none',
+  overflowY     : isMobile ? 'auto' : 'visible',
+  backgroundColor: theme.pageBg,
+  width         : isMobile ? '100%' : 'auto
       }}>
 
         {isMobile && <MobileHeader />}
