@@ -1,7 +1,7 @@
 import Sidebar     from './Sidebar'
 import BottomNav   from './BottomNav'
 import useIsMobile from '../hooks/useIsMobile'
-import { useTheme } from '../context/ThemeContext'
+import { useTheme }  from '../context/ThemeContext'
 import { getTheme }  from '../context/theme'
 
 function MobileHeader() {
@@ -13,52 +13,86 @@ function MobileHeader() {
       display        : 'flex',
       justifyContent : 'space-between',
       alignItems     : 'center',
-      marginBottom   : '20px',
-      paddingBottom  : '16px',
-      borderBottom   : `1px solid ${theme.border}`
+      padding        : '16px 20px',
+      backgroundColor: theme.cardBg,
+      borderBottom   : `1px solid ${theme.border}`,
+      position       : 'sticky',
+      top            : 0,
+      zIndex         : 100,
+      boxShadow      : theme.shadowSm
     }}>
-      <div>
+      {/* Logo */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
         <div style={{
-          fontSize  : '18px',
-          fontWeight: '800',
-          color     : theme.textPrimary,
-          fontFamily: 'Georgia, serif'
+          width          : '36px',
+          height         : '36px',
+          borderRadius   : '10px',
+          background     : 'linear-gradient(135deg, #f59e0b, #d97706)',
+          display        : 'flex',
+          alignItems     : 'center',
+          justifyContent : 'center',
+          boxShadow      : '0 4px 12px rgba(245,158,11,0.3)'
         }}>
-          Palivella
+          <span style={{
+            color     : 'white',
+            fontSize  : '18px',
+            fontWeight: '800',
+            fontFamily: 'Georgia, serif'
+          }}>P</span>
         </div>
-        <div style={{
-          fontSize     : '9px',
-          color        : '#f59e0b',
-          letterSpacing: '2px',
-          fontWeight   : '600'
-        }}>
-          J E W E L L E R Y
+        <div>
+          <div style={{
+            fontSize  : '15px',
+            fontWeight: '800',
+            color     : theme.textPrimary,
+            fontFamily: 'Georgia, serif',
+            lineHeight : '1.1'
+          }}>
+            Palivella
+          </div>
+          <div style={{
+            fontSize     : '8px',
+            color        : '#f59e0b',
+            letterSpacing: '2px',
+            fontWeight   : '600'
+          }}>
+            JEWELLERY
+          </div>
         </div>
       </div>
 
+      {/* Dark mode toggle */}
       <div
+        onClick={toggleTheme}
         style={{
-          width          : '44px',
-          height         : '24px',
-          borderRadius   : '12px',
-          backgroundColor: isDark ? '#f59e0b' : '#555',
+          width          : '48px',
+          height         : '26px',
+          borderRadius   : '13px',
+          backgroundColor: isDark ? '#f59e0b' : '#e2e8f0',
           cursor         : 'pointer',
           position       : 'relative',
-          transition     : 'background-color 0.3s'
+          transition     : 'background-color 0.3s',
+          boxShadow      : 'inset 0 2px 4px rgba(0,0,0,0.1)'
         }}
-        onClick={toggleTheme}
       >
         <div style={{
           position       : 'absolute',
-          top            : '2px',
-          left           : '2px',
+          top            : '3px',
+          left           : '3px',
           width          : '20px',
           height         : '20px',
           borderRadius   : '50%',
           backgroundColor: 'white',
           transition     : 'transform 0.3s',
-          transform      : isDark ? 'translateX(20px)' : 'translateX(0px)'
-        }} />
+          transform      : isDark ? 'translateX(22px)' : 'translateX(0px)',
+          boxShadow      : '0 2px 4px rgba(0,0,0,0.2)',
+          display        : 'flex',
+          alignItems     : 'center',
+          justifyContent : 'center',
+          fontSize       : '10px'
+        }}>
+          {isDark ? '🌙' : '☀️'}
+        </div>
       </div>
     </div>
   )
@@ -76,28 +110,28 @@ function Layout({ children }) {
       backgroundColor: theme.pageBg
     }}>
 
-      {/* Sidebar only on desktop */}
       {!isMobile && <Sidebar />}
 
-      {/* Main content */}
       <div style={{
-        marginLeft     : isMobile ? '0' : '240px',
-        flex           : 1,
-        padding        : isMobile ? '16px 16px 80px 16px' : '30px',
+        marginLeft    : isMobile ? '0' : '240px',
+        flex          : 1,
+        minHeight     : '100vh',
         backgroundColor: theme.pageBg,
-        minHeight      : '100vh',
-        width          : isMobile ? '100%' : 'auto',
-        boxSizing      : 'border-box'
+        width         : isMobile ? '100%' : 'auto'
       }}>
 
-        {/* Mobile header */}
         {isMobile && <MobileHeader />}
 
-        {children}
+        <div style={{
+          padding   : isMobile ? '16px 16px 90px 16px' : '30px',
+          maxWidth  : isMobile ? '100%' : '100%',
+          boxSizing : 'border-box'
+        }}>
+          {children}
+        </div>
 
       </div>
 
-      {/* Bottom nav only on mobile */}
       {isMobile && <BottomNav />}
 
     </div>
