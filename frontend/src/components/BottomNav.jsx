@@ -9,6 +9,7 @@ const navItems = [
   { path: '/bills',       label: 'Bills',   icon: '☰'  },
   { path: '/goldloan',    label: 'Loan',    icon: '◈'  },
   { path: '/weightcheck', label: 'Check',   icon: '⊜'  },
+  { path: '/scheme',      label: 'Scheme',  icon: '★'  },
 ]
 
 function BottomNav() {
@@ -28,12 +29,15 @@ function BottomNav() {
       borderTop      : `1px solid ${theme.border}`,
       display        : 'flex',
       alignItems     : 'center',
-      justifyContent : 'space-around',
+      overflowX      : 'auto',
+      overflowY      : 'hidden',
       zIndex         : 1000,
       paddingBottom  : '8px',
       boxShadow      : isDark
         ? '0 -4px 20px rgba(0,0,0,0.5)'
-        : '0 -4px 20px rgba(0,0,0,0.08)'
+        : '0 -4px 20px rgba(0,0,0,0.08)',
+      scrollbarWidth : 'none',
+      msOverflowStyle: 'none'
     }}>
       {navItems.map((item) => {
         const isActive = location.pathname === item.path
@@ -42,15 +46,16 @@ function BottomNav() {
             key={item.path}
             onClick={() => navigate(item.path)}
             style={{
-              display       : 'flex',
-              flexDirection : 'column',
-              alignItems    : 'center',
-              justifyContent: 'center',
-              gap           : '3px',
-              cursor        : 'pointer',
-              flex          : 1,
-              height        : '100%',
-              transition    : 'all 0.2s'
+              display        : 'flex',
+              flexDirection  : 'column',
+              alignItems     : 'center',
+              justifyContent : 'center',
+              gap            : '3px',
+              cursor         : 'pointer',
+              minWidth       : '72px',
+              height         : '100%',
+              transition     : 'all 0.2s',
+              flexShrink     : 0
             }}
           >
             <div style={{
@@ -66,7 +71,7 @@ function BottomNav() {
               transition     : 'all 0.2s'
             }}>
               <span style={{
-                fontSize  : '16px',
+                fontSize  : '18px',
                 color     : isActive ? '#f59e0b' : theme.textMuted,
                 transition: 'all 0.2s'
               }}>
@@ -77,7 +82,8 @@ function BottomNav() {
               fontSize  : '9px',
               fontWeight: isActive ? '700' : '500',
               color     : isActive ? '#f59e0b' : theme.textMuted,
-              transition: 'all 0.2s'
+              transition: 'all 0.2s',
+              whiteSpace: 'nowrap'
             }}>
               {item.label}
             </span>

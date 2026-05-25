@@ -10,6 +10,7 @@ import GoldLoan    from './pages/GoldLoan'
 import WeightCheck from './pages/WeightCheck'
 import Layout      from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
+import Scheme from './pages/Scheme'
 
 function App() {
   const { isDark } = useTheme()
@@ -40,6 +41,9 @@ function App() {
       <Route path="/weightcheck" element={
         <ProtectedRoute><Layout><WeightCheck /></Layout></ProtectedRoute>
       }/>
+      <Route path="/scheme" element={
+  <ProtectedRoute><Layout><Scheme /></Layout></ProtectedRoute>
+}/>
     </Routes>
   )
 }
