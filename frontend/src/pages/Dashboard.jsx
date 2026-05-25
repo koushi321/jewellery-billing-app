@@ -59,21 +59,26 @@ function Dashboard() {
       const pattiluAllMatch = weightChecks ? weightChecks.every(w => w.is_match) : false
 
       // Old gold/silver from bills items_json
-      let oldGoldWeight   = 0
-      let oldSilverWeight = 0
-      bills.forEach(bill => {
-        try {
-          const parsed = typeof bill.items_json === 'string' 
-  ? JSON.parse(bill.items_json) 
-  : bill.items_json
-const items = Array.isArray(parsed) ? parsed : parsed.items || []
+     let oldGoldWeight   = 0
+let oldSilverWeight = 0
+bills.forEach(bill => {
+  try {
+    const parsed   = typeof bill.items_json === 'string'
+      ? JSON.parse(bill.items_json)
+      : bill.items_json
 
-          items.forEach(item => {
-            if (item.type === 'old_gold')   oldGoldWeight   += item.weight || 0
-            if (item.type === 'old_silver') oldSilverWeight += item.weight || 0
-          })
-        } catch (_) {}
-      })
+    // old_items is separate array in the parsed object
+    const oldItems = Array.isArray(parsed) ? [] : parsed.old_items || []
+
+    oldItems.forEach(item => {
+      if (item.category === 'Gold') {
+        oldGoldWeight   += parseFloat(item.pure_weight) || 0
+      } else if (item.category === 'Silver') {
+        oldSilverWeight += parseFloat(item.pure_weight) || 0
+      }
+    })
+  } catch (_) {}
+})
 
       setData({
         bills,
