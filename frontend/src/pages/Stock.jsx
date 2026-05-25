@@ -467,19 +467,30 @@ function Stock() {
       )}
 
       {/* ── Add/Edit Form Modal ── */}
-      {showForm && (
-        <div style={{
-          position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)',
-          zIndex: 500, display: 'flex',
-          alignItems: isMobile ? 'flex-end' : 'center',
-          justifyContent: 'center', backdropFilter: 'blur(4px)'
-        }}>
-          <div style={{
-            backgroundColor: theme.cardBg,
-            borderRadius: isMobile ? '24px 24px 0 0' : '20px',
-            padding: '24px', width: isMobile ? '100%' : '480px',
-            maxHeight: '90vh', overflowY: 'auto', boxShadow: theme.shadowCard
-          }}>
+      {/* ── Add/Edit Form Modal ── */}
+{showForm && (
+  <div style={{
+    position       : 'fixed',
+    inset          : 0,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    zIndex         : 500,
+    display        : 'flex',
+    alignItems     : isMobile ? 'flex-end' : 'center',
+    justifyContent : 'center',
+    backdropFilter : 'blur(4px)',
+    overflowY      : 'auto',        // ← ADD THIS
+  }}>
+    <div style={{
+      backgroundColor          : theme.cardBg,
+      borderRadius             : isMobile ? '24px 24px 0 0' : '20px',
+      padding                  : '24px',
+      width                    : isMobile ? '100%' : '480px',
+      maxHeight                : isMobile ? '92dvh' : '90vh',  // ← dvh for mobile browsers
+      overflowY                : 'auto',
+      WebkitOverflowScrolling  : 'touch',   // ← smooth scroll on iOS
+      boxShadow                : theme.shadowCard,
+      paddingBottom            : isMobile ? '40px' : '24px',   // ← space for home bar
+    }}>
             <div style={{
               display: 'flex', justifyContent: 'space-between',
               alignItems: 'center', marginBottom: '20px'
