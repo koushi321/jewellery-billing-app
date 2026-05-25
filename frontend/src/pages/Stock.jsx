@@ -225,30 +225,131 @@ function Stock() {
       )}
 
       {/* ── Summary Cards ── */}
-      <div style={{ ...grids.grid4, marginBottom: '20px' }}>
-        {[
-          { label: 'Gold',    count: goldItems.length,    color: '#f59e0b', bg: '#fef3c7', icon: '🥇' },
-          { label: 'Silver',  count: silverItems.length,  color: '#64748b', bg: '#f1f5f9', icon: '🥈' },
-          { label: 'Pattilu', count: pattiluItems.length, color: '#8b5cf6', bg: '#ede9fe', icon: '💫' },
-          { label: 'Low',     count: lowItems.length,     color: '#ef4444', bg: '#fee2e2', icon: '⚠️' },
-        ].map((s) => (
-          <div key={s.label} style={{
-            backgroundColor: theme.cardBg, borderRadius: '14px',
-            padding: '14px', border: `1px solid ${theme.border}`, boxShadow: theme.shadowSm
-          }}>
-            <div style={{
-              width: '32px', height: '32px', borderRadius: '8px',
-              backgroundColor: s.bg, display: 'flex', alignItems: 'center',
-              justifyContent: 'center', fontSize: '16px', marginBottom: '8px'
-            }}>
-              {s.icon}
-            </div>
-            <p style={{ fontSize: '20px', fontWeight: '800', color: s.color }}>{s.count}</p>
-            <p style={{ fontSize: '11px', color: theme.textSecondary, marginTop: '2px' }}>{s.label}</p>
-          </div>
-        ))}
-      </div>
+      {/* ── Summary Cards ── */}
+{/* Weight Totals */}
+{/* Weight Totals */}
+<div style={{ ...grids.grid3, marginBottom: '12px' }}>
 
+  {/* Total Gold Weight */}
+  <div style={{
+    background     : 'linear-gradient(135deg, #f59e0b, #d97706)',
+    borderRadius   : '16px',
+    padding        : '20px',
+    boxShadow      : '0 4px 16px rgba(245,158,11,0.3)'
+  }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <div>
+        <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.8)', fontWeight: '600' }}>
+          Total Gold
+        </p>
+        <p style={{ fontSize: '28px', fontWeight: '800', color: 'white', marginTop: '4px' }}>
+          {goldItems.reduce((sum, i) => sum + (i.net_weight_g || 0), 0).toFixed(2)}g
+        </p>
+        <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', marginTop: '4px' }}>
+          {goldItems.length} items
+        </p>
+      </div>
+      <div style={{
+        width: '40px', height: '40px', borderRadius: '12px',
+        backgroundColor: 'rgba(255,255,255,0.2)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px'
+      }}>🥇</div>
+    </div>
+  </div>
+
+  {/* Total Silver Weight */}
+  <div style={{
+    background     : 'linear-gradient(135deg, #64748b, #475569)',
+    borderRadius   : '16px',
+    padding        : '20px',
+    boxShadow      : '0 4px 16px rgba(100,116,139,0.3)'
+  }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <div>
+        <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.8)', fontWeight: '600' }}>
+          Total Silver
+        </p>
+        <p style={{ fontSize: '28px', fontWeight: '800', color: 'white', marginTop: '4px' }}>
+          {silverItems.reduce((sum, i) => sum + (i.net_weight_g || 0), 0).toFixed(2)}g
+        </p>
+        <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', marginTop: '4px' }}>
+          {silverItems.length} items
+        </p>
+      </div>
+      <div style={{
+        width: '40px', height: '40px', borderRadius: '12px',
+        backgroundColor: 'rgba(255,255,255,0.2)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px'
+      }}>🥈</div>
+    </div>
+  </div>
+
+  {/* Total Pattilu Weight */}
+  <div style={{
+    background     : 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+    borderRadius   : '16px',
+    padding        : '20px',
+    boxShadow      : '0 4px 16px rgba(139,92,246,0.3)'
+  }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <div>
+        <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.8)', fontWeight: '600' }}>
+          Total Pattilu
+        </p>
+        <p style={{ fontSize: '28px', fontWeight: '800', color: 'white', marginTop: '4px' }}>
+          {pattiluItems.reduce((sum, i) => sum + (i.net_weight_g || 0), 0).toFixed(2)}g
+        </p>
+        <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', marginTop: '4px' }}>
+          {pattiluItems.length} items
+        </p>
+      </div>
+      <div style={{
+        width: '40px', height: '40px', borderRadius: '12px',
+        backgroundColor: 'rgba(255,255,255,0.2)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px'
+      }}>💫</div>
+    </div>
+  </div>
+
+</div>
+
+{/* Item Count Cards */}
+<div style={{ ...grids.grid4, marginBottom: '20px' }}>
+  {[
+    { label: 'Gold Items',    count: goldItems.length,    color: '#f59e0b', bg: '#fef3c7', icon: '🥇' },
+    { label: 'Silver Items',  count: silverItems.length,  color: '#64748b', bg: '#f1f5f9', icon: '🥈' },
+    { label: 'Pattilu',       count: pattiluItems.length, color: '#8b5cf6', bg: '#ede9fe', icon: '💫' },
+    { label: 'Low Stock',     count: lowItems.length,     color: '#ef4444', bg: '#fee2e2', icon: '⚠️' },
+  ].map((s) => (
+    <div key={s.label} style={{
+      backgroundColor: theme.cardBg,
+      borderRadius   : '14px',
+      padding        : '14px',
+      border         : `1px solid ${theme.border}`,
+      boxShadow      : theme.shadowSm
+    }}>
+      <div style={{
+        width          : '32px',
+        height         : '32px',
+        borderRadius   : '8px',
+        backgroundColor: s.bg,
+        display        : 'flex',
+        alignItems     : 'center',
+        justifyContent : 'center',
+        fontSize       : '16px',
+        marginBottom   : '8px'
+      }}>
+        {s.icon}
+      </div>
+      <p style={{ fontSize: '20px', fontWeight: '800', color: s.color }}>
+        {s.count}
+      </p>
+      <p style={{ fontSize: '11px', color: theme.textSecondary, marginTop: '2px' }}>
+        {s.label}
+      </p>
+    </div>
+  ))}
+</div>
       {/* ── Filter Tabs ── */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', overflowX: 'auto', paddingBottom: '4px' }}>
         {['All', 'Gold', 'Silver', 'Pattilu'].map(f => (
