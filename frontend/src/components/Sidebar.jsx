@@ -8,6 +8,7 @@ const menuItems = [
   { path: '/bills',       label: 'Bills History'},
   { path: '/goldloan',    label: 'Gold Loan'    },
   { path: '/weightcheck', label: 'Weight Check' },
+  { path: '/scheme',      label: 'Scheme'       },
 ]
 
 function Sidebar() {
