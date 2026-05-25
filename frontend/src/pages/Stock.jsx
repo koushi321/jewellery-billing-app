@@ -665,7 +665,7 @@ function Stock() {
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+            <div style={{ display: 'flex', gap: '10px', marginTop: '20px', marginBottom: isMobile ? '80px' : '0px' }}>
               <button
                 onClick={editItem ? handleUpdate : handleAdd}
                 style={{
