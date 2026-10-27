@@ -1,7 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import { useEffect } from 'react'
 import { useTheme } from './context/ThemeContext'
-import Login       from './pages/login'
+import Login       from './pages/Login'
 import Stock       from './pages/Stock'
 import Billing     from './pages/Billing'
 import Dashboard   from './pages/Dashboard'
