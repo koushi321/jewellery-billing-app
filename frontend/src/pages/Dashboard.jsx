@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate }         from 'react-router-dom'
 import CameraScanner           from '../components/CameraScanner'
+import { downloadBackup, getBackupStatus } from '../utils/backup'
 import { supabase }            from '../supabase'
 import { useTheme }            from '../context/ThemeContext'
 import { getTheme }            from '../context/theme'
@@ -20,6 +21,36 @@ function Dashboard() {
   const theme      = getTheme(isDark)
   const isMobile   = useIsMobile()
   const grids      = useResponsiveGrid()
+
+  // Data backup (Excel download + reminder)
+  const [backupStatus, setBackupStatus] = useState(getBackupStatus)
+  const [backingUp, setBackingUp]       = useState(false)
+  const [backupMsg, setBackupMsg]       = useState(null)
+
+  const handleBackup = async () => {
+    try {
+      setBackingUp(true)
+      setBackupMsg(null)
+      const { failed, fileName } = await downloadBackup()
+      setBackupStatus(getBackupStatus())
+      if (failed.length) {
+        setBackupMsg({ type: 'warn', text: `Downloaded ${fileName}, but these tables could not be read: ${failed.join(', ')}. Try again.` })
+      } else {
+        setBackupMsg({ type: 'success', text: `Backup downloaded: ${fileName}. Keep it safe (email it to yourself or save to a pen drive).` })
+      }
+    } catch {
+      setBackupMsg({ type: 'error', text: 'Backup failed. Check your internet connection and try again.' })
+    } finally {
+      setBackingUp(false)
+    }
+  }
+
+  const backupOverdue = backupStatus.last === null || backupStatus.days >= 7
+  const backupText = backupStatus.last === null
+    ? 'No backup downloaded yet on this device.'
+    : backupStatus.days === 0
+      ? 'Last backup: today.'
+      : `Last backup: ${backupStatus.days} day${backupStatus.days === 1 ? '' : 's'} ago.`
 
   // Scan item -> go straight to Billing
   const navigate                    = useNavigate()
@@ -264,6 +295,53 @@ bills.forEach(bill => {
             Scan item
           </button>
         </div>
+      </div>
+
+      {/* ── Data backup ── */}
+      <div style={{
+        backgroundColor: theme.cardBg,
+        borderRadius   : '16px',
+        padding        : isMobile ? '14px' : '18px 22px',
+        marginBottom   : '20px',
+        border         : `1px solid ${backupOverdue ? '#f59e0b' : theme.border}`,
+        boxShadow      : theme.shadowSm
+      }}>
+        <div style={{ fontSize: '15px', fontWeight: '700', color: theme.textPrimary, marginBottom: '4px' }}>
+          Data backup
+        </div>
+        <div style={{ fontSize: '13px', color: backupOverdue ? '#d97706' : theme.textSecondary, marginBottom: '12px', fontWeight: backupOverdue ? '600' : '400' }}>
+          {backupText}{backupOverdue ? ' Download a backup now (do this once a week).' : ''}
+        </div>
+        <button
+          onClick={handleBackup}
+          disabled={backingUp}
+          style={{
+            padding        : '11px 18px',
+            borderRadius   : '8px',
+            border         : 'none',
+            backgroundColor: '#f59e0b',
+            color          : 'white',
+            fontSize       : '14px',
+            fontWeight     : '700',
+            cursor         : 'pointer',
+            opacity        : backingUp ? 0.6 : 1,
+            width          : isMobile ? '100%' : 'auto'
+          }}
+        >
+          {backingUp ? 'Preparing backup...' : 'Download backup (Excel)'}
+        </button>
+        {backupMsg && (
+          <div style={{
+            marginTop      : '12px',
+            padding        : '10px 12px',
+            borderRadius   : '8px',
+            fontSize       : '13px',
+            backgroundColor: { success: '#d1fae5', warn: '#fef3c7', error: '#fee2e2' }[backupMsg.type],
+            color          : { success: '#065f46', warn: '#92400e', error: '#dc2626' }[backupMsg.type]
+          }}>
+            {backupMsg.text}
+          </div>
+        )}
       </div>
 
       {showCamera && (
