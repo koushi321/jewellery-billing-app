@@ -65,8 +65,8 @@ function WeightCheck() {
           setHistory(historyData || [])
 
           // Pre fill actual weights if already checked today
-          const weights = {}
-          const notesMap = {}
+          const weights = {};
+          const notesMap = {};
           (checksData || []).forEach(check => {
             weights[check.item_id]  = check.actual_weight
             notesMap[check.item_id] = check.notes
