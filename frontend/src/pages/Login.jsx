@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { supabase } from '../supabase'
 import { useNavigate } from 'react-router-dom'
+import { useTheme } from '../context/ThemeContext'
+import { getShopBackground } from '../context/theme'
 
 function Login() {
   const [username, setUsername] = useState('')
@@ -9,6 +11,7 @@ function Login() {
   const [loading, setLoading]   = useState(false)
 
   const navigate = useNavigate()
+  const { isDark } = useTheme()
 
   const handleLogin = async () => {
     if (!username || !password) {
@@ -40,7 +43,7 @@ function Login() {
   }
 
   return (
-    <div style={styles.container}>
+    <div style={{ ...styles.container, background: getShopBackground(isDark) }}>
       <div style={styles.box}>
 
         <h1 style={styles.title}>Palivella Jewellery</h1>

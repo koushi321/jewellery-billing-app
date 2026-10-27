@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { useNavigate }         from 'react-router-dom'
+import CameraScanner           from '../components/CameraScanner'
 import { supabase }            from '../supabase'
 import { useTheme }            from '../context/ThemeContext'
 import { getTheme }            from '../context/theme'
@@ -18,6 +20,22 @@ function Dashboard() {
   const theme      = getTheme(isDark)
   const isMobile   = useIsMobile()
   const grids      = useResponsiveGrid()
+
+  // Scan item -> go straight to Billing
+  const navigate                    = useNavigate()
+  const scanRef                     = useRef(null)
+  const [scanValue, setScanValue]   = useState('')
+  const [showCamera, setShowCamera] = useState(false)
+
+  const goToBilling = (raw) => {
+    const code = String(raw || '').trim().toUpperCase()
+    if (!code) return
+    navigate('/billing', { state: { barcode: code } })
+  }
+
+  useEffect(() => {
+    if (!isMobile && scanRef.current) scanRef.current.focus()
+  }, [isMobile])
 
   const fetchDashboard = async (selectedDate) => {
     try {
@@ -189,6 +207,71 @@ bills.forEach(bill => {
           )}
         </div>
       </div>
+
+      {/* ── Scan Item ── */}
+      <div style={{
+        backgroundColor: theme.cardBg,
+        borderRadius   : '16px',
+        padding        : isMobile ? '14px' : '18px 22px',
+        marginBottom   : '20px',
+        border         : `1px solid ${theme.border}`,
+        boxShadow      : theme.shadowSm
+      }}>
+        <div style={{ fontSize: '15px', fontWeight: '700', color: theme.textPrimary, marginBottom: '4px' }}>
+          Scan item
+        </div>
+        <div style={{ fontSize: '12px', color: theme.textSecondary, marginBottom: '12px' }}>
+          Scan a tag to open Billing with that item filled in.
+        </div>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <input
+            ref={scanRef}
+            style={{
+              flex           : 1,
+              minWidth       : '180px',
+              padding        : '11px 12px',
+              borderRadius   : '8px',
+              border         : `1px solid ${theme.borderInput}`,
+              backgroundColor: theme.inputBg,
+              color          : theme.textPrimary,
+              fontSize       : '14px',
+              outline        : 'none'
+            }}
+            placeholder="Scan with scanner, then it opens Billing"
+            value={scanValue}
+            onChange={e => setScanValue(e.target.value)}
+            onKeyDown={e => {
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                goToBilling(scanValue)
+              }
+            }}
+            autoComplete="off"
+          />
+          <button
+            onClick={() => setShowCamera(true)}
+            style={{
+              padding        : '11px 18px',
+              borderRadius   : '8px',
+              border         : 'none',
+              backgroundColor: '#f59e0b',
+              color          : 'white',
+              fontSize       : '14px',
+              fontWeight     : '700',
+              cursor         : 'pointer'
+            }}
+          >
+            Scan item
+          </button>
+        </div>
+      </div>
+
+      {showCamera && (
+        <CameraScanner
+          onScan={(text) => { setShowCamera(false); goToBilling(text) }}
+          onClose={() => setShowCamera(false)}
+        />
+      )}
 
       {error && (
         <div style={{

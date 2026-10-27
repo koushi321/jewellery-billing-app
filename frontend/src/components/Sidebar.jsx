@@ -4,6 +4,7 @@ import { useTheme } from '../context/ThemeContext'
 const menuItems = [
   { path: '/dashboard',   label: 'Dashboard'    },
   { path: '/stock',       label: 'Stock'        },
+  { path: '/barcode',     label: 'Barcode'      },
   { path: '/billing',     label: 'Billing'      },
   { path: '/bills',       label: 'Bills History'},
   { path: '/goldloan',    label: 'Gold Loan'    },

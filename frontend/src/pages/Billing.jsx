@@ -2,8 +2,31 @@ import useIsMobile       from '../hooks/useIsMobile'
 import useResponsiveGrid from '../hooks/useResponsiveGrid'
 import { useTheme } from '../context/ThemeContext'
 import { getTheme } from '../context/theme'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { supabase } from '../supabase'
+import CameraScanner from '../components/CameraScanner'
+
+// Looks up a scanned barcode in the items table.
+// Returns { code, item } when it can be billed, or { code, problem } with the reason.
+const fetchBarcodeItem = async (raw) => {
+  const code = String(raw || '').trim().toUpperCase()
+  if (!code) return { code, problem: '' }
+  const { data, error } = await supabase
+    .from('items')
+    .select('*')
+    .eq('barcode', code)
+    .maybeSingle()
+  if (error)  return { code, problem: 'Could not look up the barcode. Check your connection.' }
+  if (!data)  return { code, problem: `Barcode ${code} was not found.` }
+  if (data.status === 'unassigned') {
+    return { code, problem: `${code} has no item details yet. Add details on the Barcode page first.` }
+  }
+  if (data.status === 'sold') {
+    return { code, problem: `${code} is already sold${data.name ? ` (${data.name})` : ''}.` }
+  }
+  return { code, item: data }
+}
 
 function Billing() {
 
@@ -21,10 +44,21 @@ function Billing() {
   const [error, setError]                 = useState('')
   const [success, setSuccess]             = useState('')
   const [savedBill, setSavedBill]         = useState(null)
+  const isDesktop = !isMobile
+  const location  = useLocation()
+  const navigate  = useNavigate()
+
+  // Barcode scanning
+  const scanRef                     = useRef(null)
+  const [scanValue, setScanValue]   = useState('')
+  const [showCamera, setShowCamera] = useState(false)
+  const [lastRates, setLastRates]   = useState({})
 
   // Current new item being added
   const [currentItem, setCurrentItem] = useState({
     item_id       : '',
+    barcode       : '',
+    barcode_info  : '',
     item_name     : '',
     category      : '',
     gold_type     : 'KDM',
@@ -71,6 +105,8 @@ function Billing() {
   setCurrentItem(prev => ({
     ...prev,
     item_id       : selected.id,
+    barcode       : '',
+    barcode_info  : '',
     item_name     : selected.name,
     category      : selected.category,
     making_charges: '',
@@ -78,6 +114,82 @@ function Billing() {
     gold_type     : 'KDM'
   }))
 }
+  // ── BARCODE SCAN ───────────────────────────────────────
+  // Fills the Add Item form from a scanned barcode
+  const applyScanned = (result) => {
+    if (result.problem !== undefined && !result.item) {
+      if (result.problem) setError(result.problem)
+      return
+    }
+    const item = result.item
+    if (billItems.some(b => b.barcode === item.barcode)) {
+      setError(`${item.barcode} is already on this bill`)
+      return
+    }
+    setError('')
+    setSuccess('')
+    const category = item.metal === 'Silver' ? 'Silver' : 'Gold'
+    setCurrentItem(prev => ({
+      ...prev,
+      item_id       : '',
+      barcode       : item.barcode,
+      barcode_info  : `${item.barcode} · ${item.name}${item.purity ? ' · ' + item.purity : ''} · net ${item.net_weight_g} g`,
+      item_name     : item.name,
+      category,
+      gold_type     : 'KDM',
+      actual_weight : String(item.net_weight_g ?? ''),
+      extra_weight  : 0.25,
+      making_charges: '',
+      rate          : lastRates[category] ?? ''
+    }))
+  }
+
+  const handleScan = async (raw) => {
+    const result = await fetchBarcodeItem(raw)
+    applyScanned(result)
+  }
+
+  const handleScanKey = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      const value = scanValue
+      setScanValue('')
+      handleScan(value)
+    }
+  }
+
+  const handleCameraScan = (text) => {
+    setShowCamera(false)
+    handleScan(text)
+  }
+
+  const clearScanned = () => {
+    setCurrentItem(prev => ({
+      ...prev,
+      barcode: '', barcode_info: '', item_name: '', category: '',
+      actual_weight: '', rate: '', making_charges: '', extra_weight: 0.25
+    }))
+  }
+
+  // Item scanned on the Dashboard arrives here as location.state.barcode
+  const incomingBarcode = location.state?.barcode
+  useEffect(() => {
+    if (!incomingBarcode) return
+    let cancelled = false
+    ;(async () => {
+      const result = await fetchBarcodeItem(incomingBarcode)
+      if (cancelled) return
+      applyScanned(result)
+      navigate(location.pathname, { replace: true, state: null })
+    })()
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [incomingBarcode])
+
+  useEffect(() => {
+    if (isDesktop && scanRef.current) scanRef.current.focus()
+  }, [isDesktop])
+
   // ── CALCULATE NEW ITEM PRICE ───────────────────────────
  const calculateItemPrice = (item) => {
   const actual  = parseFloat(item.actual_weight) || 0
@@ -129,8 +241,12 @@ function Billing() {
   // ── ADD NEW ITEM TO BILL ───────────────────────────────
   const handleAddItem = () => {
     setError('')
-    if (!currentItem.item_id) {
-      setError('Please select an item')
+    if (!currentItem.item_id && !currentItem.barcode) {
+      setError('Please select an item or scan a barcode')
+      return
+    }
+    if (currentItem.barcode && billItems.some(b => b.barcode === currentItem.barcode)) {
+      setError(`${currentItem.barcode} is already on this bill`)
       return
     }
     if (!currentItem.actual_weight || parseFloat(currentItem.actual_weight) <= 0) {
@@ -152,6 +268,7 @@ function Billing() {
     const calc = calculateItemPrice(currentItem)
     setBillItems(prev => [...prev, {
       ...currentItem,
+      item_id       : currentItem.barcode ? null : currentItem.item_id,
       billing_weight: calc.billing_weight,
       price         : calc.price,
       making_charges: calc.making_charges,
@@ -159,9 +276,12 @@ function Billing() {
       uid           : Date.now()
     }])
 
+    setLastRates(prev => ({ ...prev, [currentItem.category]: currentItem.rate }))
     setCurrentItem(prev => ({
       ...prev,
       item_id       : '',
+      barcode       : '',
+      barcode_info  : '',
       item_name     : '',
       category      : '',
       actual_weight : '',
@@ -220,7 +340,25 @@ function Billing() {
       setError('Please add at least one item to the bill')
       return
     }
+    const scannedCodes = billItems.map(i => i.barcode).filter(Boolean)
     try {
+      // Make sure every scanned piece is still in stock (not sold on another device)
+      if (scannedCodes.length) {
+        const { data: current, error: checkErr } = await supabase
+          .from('items')
+          .select('barcode, status')
+          .in('barcode', scannedCodes)
+        if (checkErr) throw checkErr
+        const notAvailable = scannedCodes.filter(code => {
+          const row = (current || []).find(r => r.barcode === code)
+          return !row || row.status !== 'in_stock'
+        })
+        if (notAvailable.length) {
+          setError(`These items are no longer available: ${notAvailable.join(', ')}. Remove them from the bill.`)
+          return
+        }
+      }
+
       const today    = new Date().toISOString().split('T')[0]
       const { data, error } = await supabase.rpc('create_bill_transaction', {
         p_customer_name : customerName || 'Walk-in Customer',
@@ -235,8 +373,23 @@ function Billing() {
 
       if (error) throw error
 
+      // Mark scanned pieces as sold and link them to this bill
+      let soldWarning = ''
+      if (scannedCodes.length) {
+        const { data: soldRows, error: soldErr } = await supabase
+          .from('items')
+          .update({ status: 'sold', sold_bill_id: data.id, updated_at: new Date().toISOString() })
+          .in('barcode', scannedCodes)
+          .eq('status', 'in_stock')
+          .select('barcode')
+        if (soldErr || (soldRows || []).length !== scannedCodes.length) {
+          soldWarning = 'Bill saved, but some scanned items could not be marked as sold. Check them on the Barcode page.'
+        }
+      }
+
       setSavedBill(data)
       setSuccess('Bill saved successfully!')
+      if (soldWarning) setError(soldWarning)
       setBillItems([])
       setOldItems([])
       setCustomerName('')
@@ -829,6 +982,10 @@ function Billing() {
       {error   && <div style={styles.error}>{error}</div>}
       {success && <div style={styles.successMsg}>{success}</div>}
 
+      {showCamera && (
+        <CameraScanner onScan={handleCameraScan} onClose={() => setShowCamera(false)} />
+      )}
+
       {/* Customer Details */}
       <div style={styles.card}>
         <h2 style={styles.cardTitle}>Customer Details</h2>
@@ -857,6 +1014,49 @@ function Billing() {
       {/* Add New Item */}
       <div style={styles.card}>
         <h2 style={styles.cardTitle}>Add New Item to Bill</h2>
+
+        {/* Scan barcode */}
+        <div style={{ marginBottom: '16px' }}>
+          <label style={styles.label}>Scan barcode</label>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            <input
+              ref={scanRef}
+              style={{ ...styles.input, flex: 1, minWidth: '180px', width: 'auto' }}
+              placeholder="Scan the tag with a scanner, or type the ID and press Enter"
+              value={scanValue}
+              onChange={e => setScanValue(e.target.value)}
+              onKeyDown={handleScanKey}
+              autoComplete="off"
+            />
+            <button style={styles.addItemButton} onClick={() => setShowCamera(true)}>
+              Scan with camera
+            </button>
+          </div>
+          {currentItem.barcode && (
+            <div style={{
+              marginTop      : '10px',
+              padding        : '10px 12px',
+              borderRadius   : '8px',
+              backgroundColor: isDark ? '#052e1c' : '#ecfdf5',
+              border         : `1px solid ${isDark ? '#065f46' : '#a7f3d0'}`,
+              color          : isDark ? '#6ee7b7' : '#065f46',
+              fontSize       : '13px',
+              display        : 'flex',
+              justifyContent : 'space-between',
+              alignItems     : 'center',
+              gap            : '10px'
+            }}>
+              <span>Scanned: {currentItem.barcode_info}. Enter the rate and click Add to Bill.</span>
+              <button
+                onClick={clearScanned}
+                style={{ border: 'none', background: 'transparent', color: 'inherit', cursor: 'pointer', fontWeight: '700' }}
+              >
+                Clear
+              </button>
+            </div>
+          )}
+        </div>
+
         <div style={styles.formGrid3}>
 
           <div style={styles.inputGroup}>

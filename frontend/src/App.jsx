@@ -1,7 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import { useEffect } from 'react'
 import { useTheme } from './context/ThemeContext'
-import Login       from './pages/Login'
+import Login       from './pages/login'
 import Stock       from './pages/Stock'
 import Billing     from './pages/Billing'
 import Dashboard   from './pages/Dashboard'
@@ -11,6 +11,7 @@ import WeightCheck from './pages/WeightCheck'
 import Layout      from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 import Scheme from './pages/Scheme'
+import Barcode from './pages/Barcode'
 
 function App() {
   const { isDark } = useTheme()
@@ -28,6 +29,9 @@ function App() {
       }/>
       <Route path="/stock" element={
         <ProtectedRoute><Layout><Stock /></Layout></ProtectedRoute>
+      }/>
+      <Route path="/barcode" element={
+        <ProtectedRoute><Layout><Barcode /></Layout></ProtectedRoute>
       }/>
       <Route path="/billing" element={
         <ProtectedRoute><Layout><Billing /></Layout></ProtectedRoute>

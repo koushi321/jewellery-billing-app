@@ -34,3 +34,16 @@ export const getTheme = (isDark) => ({
   purple : '#8b5cf6',
   primary: '#1a1a2e',
 })
+
+// Gold shop background: your shop photo at /public/shop-bg.jpg,
+// a soft overlay so text stays readable, and a gold-brown gradient
+// that shows if the photo is missing.
+export const getShopBackground = (isDark) => {
+  const overlay = isDark
+    ? 'linear-gradient(rgba(12,9,4,0.82), rgba(12,9,4,0.88))'
+    : 'linear-gradient(rgba(255,248,232,0.84), rgba(255,243,215,0.90))'
+  const fallback = isDark
+    ? 'linear-gradient(135deg, #1a1205, #0a0a0f)'
+    : 'linear-gradient(135deg, #fff3d6, #f6e3b0)'
+  return `${overlay}, url(/shop-bg.jpg) center / cover no-repeat, ${fallback}`
+}

@@ -5,6 +5,7 @@ import { getTheme } from '../context/theme'
 const navItems = [
   { path: '/dashboard',   label: 'Home',    icon: '⌂'  },
   { path: '/stock',       label: 'Stock',   icon: '▦'  },
+  { path: '/barcode',     label: 'Barcode', icon: '▥'  },
   { path: '/billing',     label: 'Bill',    icon: '⊕'  },
   { path: '/bills',       label: 'Bills',   icon: '☰'  },
   { path: '/goldloan',    label: 'Loan',    icon: '◈'  },
