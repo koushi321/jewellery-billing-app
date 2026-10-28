@@ -1,6 +1,7 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import { useTheme } from './context/ThemeContext'
+import Home        from './pages/Home'
 import Login       from './pages/Login'
 import Stock       from './pages/Stock'
 import Billing     from './pages/Billing'
@@ -23,7 +24,8 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/" element={<Login />} />
+      <Route path="/" element={<Home />} />
+      <Route path="/login" element={<Login />} />
       <Route path="/dashboard" element={
         <ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>
       }/>
@@ -48,6 +50,7 @@ function App() {
       <Route path="/scheme" element={
   <ProtectedRoute><Layout><Scheme /></Layout></ProtectedRoute>
 }/>
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 }

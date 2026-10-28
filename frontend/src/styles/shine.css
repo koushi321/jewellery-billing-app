@@ -1,0 +1,22 @@
+/* Gold foil lettering with a soft light glint that sweeps across now and then */
+.pj-shine {
+  color: #dcbe76; /* used only if the browser cannot clip the gradient to the letters */
+  background:
+    linear-gradient(105deg, rgba(255,247,218,0) 40%, rgba(255,247,218,0.95) 50%, rgba(255,247,218,0) 60%) no-repeat 130% 0 / 200% 100%,
+    linear-gradient(180deg, #f3e0a6 0%, #d4b068 36%, #b98f3e 62%, #e8cd8b 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  filter: drop-shadow(0 2px 14px rgba(201, 164, 92, 0.2));
+  animation: pj-glint 6s linear infinite;
+}
+
+@keyframes pj-glint {
+  0%, 55% { background-position: 130% 0, 0 0; }
+  100%    { background-position: -30% 0, 0 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pj-shine { animation: none; }
+}
