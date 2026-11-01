@@ -506,7 +506,7 @@ function Billing() {
     color     : theme.textPrimary
   },
   addItemButton: {
-    backgroundColor: '#f59e0b',
+    backgroundColor: '#c9a45c',
     color          : 'white',
     border         : 'none',
     padding        : '10px 24px',
@@ -625,7 +625,7 @@ function Billing() {
   grandTotalLabel: {
     fontSize  : '16px',
     fontWeight: '700',
-    color     : '#f59e0b'
+    color     : '#c9a45c'
   },
   grandTotalValue: {
     fontSize  : '20px',
@@ -653,7 +653,7 @@ function Billing() {
     textAlign      : 'center'
   },
   saveBillButton: {
-    backgroundColor: '#1a1a2e',
+    backgroundColor: '#1d1812',
     color          : 'white',
     border         : 'none',
     padding        : '12px 32px',
@@ -733,7 +733,7 @@ function Billing() {
     marginBottom  : '20px'
   },
   billTableHead: {
-    backgroundColor: '#1a1a2e'
+    backgroundColor: '#1d1812'
   },
   billTh: {
     padding   : '10px 12px',
@@ -777,7 +777,7 @@ function Billing() {
     marginTop     : '20px'
   },
   printButton: {
-    backgroundColor: '#1a1a2e',
+    backgroundColor: '#1d1812',
     color          : 'white',
     border         : 'none',
     padding        : '12px 32px',
@@ -1154,7 +1154,7 @@ function Billing() {
 
           <div style={styles.previewItem}>
             <span style={styles.previewLabel}>Item Price</span>
-            <span style={{ ...styles.previewValue, color: '#f59e0b' }}>
+            <span style={{ ...styles.previewValue, color: '#c9a45c' }}>
               ₹{calc.price.toFixed(2)}
             </span>
           </div>

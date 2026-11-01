@@ -3,96 +3,45 @@ import BottomNav   from './BottomNav'
 import useIsMobile from '../hooks/useIsMobile'
 import { useTheme }  from '../context/ThemeContext'
 import { getTheme }  from '../context/theme'
+import { Sun, Moon } from 'lucide-react'
 
 function MobileHeader() {
   const { isDark, toggleTheme } = useTheme()
-  const theme = getTheme(isDark)
 
   return (
     <div style={{
       display        : 'flex',
       justifyContent : 'space-between',
       alignItems     : 'center',
-      padding        : '16px 20px',
-      backgroundColor: theme.cardBg,
-      borderBottom   : `1px solid ${theme.border}`,
+      padding        : '14px 18px',
+      backgroundColor: '#0a0908',
+      borderBottom   : '1px solid rgba(201,164,92,0.3)',
       position       : 'sticky',
       top            : 0,
       zIndex         : 100,
-      boxShadow      : theme.shadowSm
+      boxShadow      : '0 4px 18px rgba(0,0,0,0.4)'
     }}>
-      {/* Logo */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <div style={{
-          width          : '36px',
-          height         : '36px',
-          borderRadius   : '10px',
-          background     : 'linear-gradient(135deg, #f59e0b, #d97706)',
-          display        : 'flex',
-          alignItems     : 'center',
-          justifyContent : 'center',
-          boxShadow      : '0 4px 12px rgba(245,158,11,0.3)'
-        }}>
-          <span style={{
-            color     : 'white',
-            fontSize  : '18px',
-            fontWeight: '800',
-            fontFamily: 'Georgia, serif'
-          }}>P</span>
-        </div>
-        <div>
-          <div style={{
-            fontSize  : '15px',
-            fontWeight: '800',
-            color     : theme.textPrimary,
-            fontFamily: 'Georgia, serif',
-            lineHeight : '1.1'
-          }}>
-            Palivella
-          </div>
-          <div style={{
-            fontSize     : '8px',
-            color        : '#f59e0b',
-            letterSpacing: '2px',
-            fontWeight   : '600'
-          }}>
-            JEWELLERY
-          </div>
-        </div>
+      <div className="app-logo">
+        <span className="app-logo-main" style={{ fontSize: '17px' }}>Sri Palivela</span>
+        <span className="app-logo-sub">Jewellery</span>
       </div>
 
-      {/* Dark mode toggle */}
       <div
         onClick={toggleTheme}
         style={{
-          width          : '48px',
-          height         : '26px',
-          borderRadius   : '13px',
-          backgroundColor: isDark ? '#f59e0b' : '#e2e8f0',
-          cursor         : 'pointer',
-          position       : 'relative',
-          transition     : 'background-color 0.3s',
-          boxShadow      : 'inset 0 2px 4px rgba(0,0,0,0.1)'
-        }}
-      >
-        <div style={{
-          position       : 'absolute',
-          top            : '3px',
-          left           : '3px',
-          width          : '20px',
-          height         : '20px',
+          width          : '38px',
+          height         : '38px',
           borderRadius   : '50%',
-          backgroundColor: 'white',
-          transition     : 'transform 0.3s',
-          transform      : isDark ? 'translateX(22px)' : 'translateX(0px)',
-          boxShadow      : '0 2px 4px rgba(0,0,0,0.2)',
+          border         : '1px solid rgba(201,164,92,0.45)',
           display        : 'flex',
           alignItems     : 'center',
           justifyContent : 'center',
-          fontSize       : '10px'
-        }}>
-          {isDark ? '🌙' : '☀️'}
-        </div>
+          cursor         : 'pointer',
+          color          : '#e2c689'
+        }}
+        aria-label="Change theme"
+      >
+        {isDark ? <Moon size={17} strokeWidth={1.8} /> : <Sun size={17} strokeWidth={1.8} />}
       </div>
     </div>
   )
@@ -119,12 +68,15 @@ function Layout({ children }) {
   maxHeight     : isMobile ? '100vh' : 'none',
   overflowY     : isMobile ? 'auto' : 'visible',
   backgroundColor: theme.pageBg,
+  backgroundImage: isDark
+    ? 'radial-gradient(ellipse at 80% -10%, rgba(201,164,92,0.10), transparent 55%)'
+    : 'radial-gradient(ellipse at 80% -10%, rgba(201,164,92,0.14), transparent 55%)',
   width         : isMobile ? '100%' : 'auto'
       }}>
 
         {isMobile && <MobileHeader />}
 
-        <div style={{
+        <div className="app-page" style={{
           padding   : isMobile ? '16px 16px 90px 16px' : '30px',
           maxWidth  : isMobile ? '100%' : '100%',
           boxSizing : 'border-box'

@@ -341,7 +341,7 @@ function Barcode() {
     padding        : '11px 18px',
     borderRadius   : '8px',
     border         : 'none',
-    backgroundColor: '#f59e0b',
+    backgroundColor: '#c9a45c',
     color          : 'white',
     fontSize       : '14px',
     fontWeight     : '700',
@@ -367,7 +367,7 @@ function Barcode() {
 
   const badge = (status) => {
     const colors = {
-      unassigned: { bg: isDark ? '#2a2000' : '#fef3c7', fg: '#d97706' },
+      unassigned: { bg: isDark ? '#2a2000' : '#fef3c7', fg: '#a8823a' },
       in_stock  : { bg: isDark ? '#052e1c' : '#d1fae5', fg: '#059669' },
       sold      : { bg: isDark ? '#1f2937' : '#e2e8f0', fg: isDark ? '#9ca3af' : '#475569' }
     }[status] || { bg: '#e2e8f0', fg: '#475569' }
@@ -734,7 +734,7 @@ function Barcode() {
             <div style={{
               fontFamily: 'monospace',
               fontWeight: '700',
-              color     : '#f59e0b',
+              color     : '#c9a45c',
               fontSize  : '15px',
               marginBottom: '16px'
             }}>

@@ -1,38 +1,38 @@
 export const getTheme = (isDark) => ({
   // Backgrounds
-  pageBg    : isDark ? '#0a0a0f' : '#f0f2f5',
-  cardBg    : isDark ? '#1a1d2e' : '#ffffff',
-  inputBg   : isDark ? '#0f1117' : '#f8f9fa',
-  headerBg  : isDark ? '#13151f' : '#f8f9fa',
-  overlayBg : isDark ? '#1a1d2e' : '#ffffff',
+  pageBg    : isDark ? '#0a0908' : '#f6f1e6',
+  cardBg    : isDark ? '#14110d' : '#ffffff',
+  inputBg   : isDark ? '#0d0b09' : '#faf6ee',
+  headerBg  : isDark ? '#1b1610' : '#f1e9d7',
+  overlayBg : isDark ? '#14110d' : '#ffffff',
 
   // Text
-  textPrimary  : isDark ? '#ffffff' : '#1a1a2e',
-  textSecondary: isDark ? '#9ca3af' : '#64748b',
-  textMuted    : isDark ? '#6b7280' : '#94a3b8',
+  textPrimary  : isDark ? '#f4ecdc' : '#2b2220',
+  textSecondary: isDark ? '#b3a68e' : '#6e6157',
+  textMuted    : isDark ? '#7f7461' : '#9a8f80',
 
   // Borders
-  border     : isDark ? '#2a2d3e' : '#e8ecf0',
-  borderInput: isDark ? '#2a2d3e' : '#e2e8f0',
+  border     : isDark ? 'rgba(201,164,92,0.2)'  : '#e8dfca',
+  borderInput: isDark ? 'rgba(201,164,92,0.3)'  : '#e0d4ba',
 
   // Shadows
   shadow    : isDark
-    ? '0 4px 24px rgba(0,0,0,0.4)'
-    : '0 4px 24px rgba(0,0,0,0.06)',
+    ? '0 6px 28px rgba(0,0,0,0.5)'
+    : '0 6px 24px rgba(120,90,30,0.08)',
   shadowSm  : isDark
-    ? '0 2px 8px rgba(0,0,0,0.3)'
-    : '0 2px 8px rgba(0,0,0,0.04)',
+    ? '0 2px 10px rgba(0,0,0,0.4)'
+    : '0 2px 8px rgba(120,90,30,0.06)',
   shadowCard: isDark
-    ? '0 8px 32px rgba(0,0,0,0.5)'
-    : '0 8px 32px rgba(0,0,0,0.08)',
+    ? '0 12px 40px rgba(0,0,0,0.6)'
+    : '0 12px 36px rgba(120,90,30,0.12)',
 
   // Accents
-  accent : '#f59e0b',
+  accent : '#c9a45c',
   success: '#10b981',
   danger : '#ef4444',
   info   : '#3b82f6',
   purple : '#8b5cf6',
-  primary: '#1a1a2e',
+  primary: '#1d1812',
 })
 
 // Gold shop background: your shop photo at /public/shop-bg.jpg,

@@ -234,7 +234,7 @@ function WeightCheck() {
     fontWeight   : '600',
     color        : theme.textPrimary,
     cursor       : 'pointer',
-    borderBottom : '2px solid #f59e0b',
+    borderBottom : '2px solid #c9a45c',
     marginBottom : '-2px'
   },
   summaryBar: {
@@ -334,7 +334,7 @@ function WeightCheck() {
     fontWeight   : '600'
   },
   saveButton: {
-    backgroundColor: '#1a1a2e',
+    backgroundColor: '#1d1812',
     color          : 'white',
     border         : 'none',
     padding        : '12px 32px',

@@ -163,13 +163,13 @@ function Stock() {
   // ── STATUS ─────────────────────────────────────────────
   const getStatus = (item) => {
     if (item.net_weight_g <= 0)                     return { label: 'Out of Stock', color: '#ef4444', bg: '#fee2e2' }
-    if (item.net_weight_g <= item.reorder_weight_g) return { label: 'Low Stock',    color: '#f59e0b', bg: '#fef3c7' }
+    if (item.net_weight_g <= item.reorder_weight_g) return { label: 'Low Stock',    color: '#c9a45c', bg: '#fef3c7' }
     return                                                  { label: 'In Stock',     color: '#10b981', bg: '#d1fae5' }
   }
 
   // ── CATEGORY ICON ──────────────────────────────────────
   const getCategoryIcon = (category) => {
-    if (category === 'Gold')    return { icon: '🥇', bg: '#fef3c7', color: '#f59e0b' }
+    if (category === 'Gold')    return { icon: '🥇', bg: '#fef3c7', color: '#c9a45c' }
     if (category === 'Silver')  return { icon: '🥈', bg: '#f1f5f9', color: '#64748b' }
     if (category === 'Pattilu') return { icon: '💫', bg: '#ede9fe', color: '#8b5cf6' }
     return                             { icon: '📦', bg: '#f1f5f9', color: '#64748b' }
@@ -206,9 +206,9 @@ function Stock() {
             setShowForm(true)
           }}
           style={{
-            backgroundColor: '#1a1a2e', color: 'white', border: 'none',
+            backgroundColor: '#1d1812', color: 'white', border: 'none',
             padding: '10px 18px', borderRadius: '12px', fontSize: '13px',
-            fontWeight: '700', cursor: 'pointer', boxShadow: '0 4px 12px rgba(26,26,46,0.3)'
+            fontWeight: '700', cursor: 'pointer', boxShadow: '0 4px 12px rgba(29,24,18,0.3)'
           }}
         >
           + Add Item
@@ -232,10 +232,10 @@ function Stock() {
 
   {/* Total Gold Weight */}
   <div style={{
-    background     : 'linear-gradient(135deg, #f59e0b, #d97706)',
+    background     : 'linear-gradient(135deg, #c9a45c, #a8823a)',
     borderRadius   : '16px',
     padding        : '20px',
-    boxShadow      : '0 4px 16px rgba(245,158,11,0.3)'
+    boxShadow      : '0 4px 16px rgba(201,164,92,0.3)'
   }}>
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
       <div>
@@ -316,7 +316,7 @@ function Stock() {
 {/* Item Count Cards */}
 <div style={{ ...grids.grid4, marginBottom: '20px' }}>
   {[
-    { label: 'Gold Items',    count: goldItems.length,    color: '#f59e0b', bg: '#fef3c7', icon: '🥇' },
+    { label: 'Gold Items',    count: goldItems.length,    color: '#c9a45c', bg: '#fef3c7', icon: '🥇' },
     { label: 'Silver Items',  count: silverItems.length,  color: '#64748b', bg: '#f1f5f9', icon: '🥈' },
     { label: 'Pattilu',       count: pattiluItems.length, color: '#8b5cf6', bg: '#ede9fe', icon: '💫' },
     { label: 'Low Stock',     count: lowItems.length,     color: '#ef4444', bg: '#fee2e2', icon: '⚠️' },
@@ -358,8 +358,8 @@ function Stock() {
             onClick={() => setFilter(f)}
             style={{
               padding: '8px 16px', borderRadius: '20px',
-              border: `1px solid ${filter === f ? '#1a1a2e' : theme.border}`,
-              backgroundColor: filter === f ? '#1a1a2e' : theme.cardBg,
+              border: `1px solid ${filter === f ? '#1d1812' : theme.border}`,
+              backgroundColor: filter === f ? '#1d1812' : theme.cardBg,
               color: filter === f ? 'white' : theme.textSecondary,
               fontSize: '13px', fontWeight: '600', cursor: 'pointer',
               whiteSpace: 'nowrap', boxShadow: theme.shadowSm
@@ -540,7 +540,7 @@ function Stock() {
                         <button
                           onClick={() => handleEditClick(item)}
                           style={{
-                            backgroundColor: '#f59e0b', color: 'white', border: 'none',
+                            backgroundColor: '#c9a45c', color: 'white', border: 'none',
                             padding: '6px 14px', borderRadius: '8px', fontSize: '13px',
                             cursor: 'pointer', fontWeight: '600'
                           }}
@@ -771,7 +771,7 @@ function Stock() {
                 onClick={editItem ? handleUpdate : handleAdd}
                 style={{
                   flex: 1, padding: '14px', borderRadius: '12px', border: 'none',
-                  backgroundColor: '#1a1a2e', color: 'white',
+                  backgroundColor: '#1d1812', color: 'white',
                   fontSize: '15px', fontWeight: '700', cursor: 'pointer'
                 }}
               >

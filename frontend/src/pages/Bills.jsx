@@ -193,7 +193,7 @@ function Bills() {
     },
     itemChip: {
       fontSize        : '12px',
-      backgroundColor : isDark ? '#2a2d3e' : '#f1f5f9',
+      backgroundColor : isDark ? '#2b251a' : '#f1f5f9',
       color           : theme.textPrimary,
       padding         : '2px 8px',
       borderRadius    : '4px',
@@ -202,7 +202,7 @@ function Bills() {
       marginRight     : '4px'
     },
     viewButton: {
-      backgroundColor: '#1a1a2e',
+      backgroundColor: '#1d1812',
       color          : 'white',
       border         : 'none',
       padding        : '8px 16px',
@@ -222,7 +222,7 @@ function Bills() {
       cursor         : 'pointer'
     },
     totalRow: {
-      backgroundColor: '#1a1a2e'
+      backgroundColor: '#1d1812'
     },
     totalLabel: {
       padding   : '14px 16px',
@@ -235,7 +235,7 @@ function Bills() {
       padding   : '14px 16px',
       fontSize  : '16px',
       fontWeight: '800',
-      color     : '#f59e0b'
+      color     : '#c9a45c'
     },
     loadingText: {
       color   : theme.textSecondary,
@@ -312,7 +312,7 @@ function Bills() {
       marginBottom  : '16px'
     },
     billTableHead: {
-      backgroundColor: '#1a1a2e'
+      backgroundColor: '#1d1812'
     },
     billTh: {
       padding   : '10px 12px',
@@ -366,7 +366,7 @@ function Bills() {
     grandTotalLabel: {
       fontSize  : '16px',
       fontWeight: '700',
-      color     : '#f59e0b'
+      color     : '#c9a45c'
     },
     grandTotalValue: {
       fontSize  : '20px',
@@ -390,7 +390,7 @@ function Bills() {
       marginTop     : '24px'
     },
     printButton: {
-      backgroundColor: '#1a1a2e',
+      backgroundColor: '#1d1812',
       color          : 'white',
       border         : 'none',
       padding        : '12px 40px',
@@ -682,7 +682,7 @@ function Bills() {
                 const items  = Array.isArray(parsed) ? parsed : parsed.items || []
                 return (
                   <tr key={bill.id} style={styles.tableRow}>
-                    <td style={{ ...styles.td, fontWeight: '600', color: '#f59e0b' }}>
+                    <td style={{ ...styles.td, fontWeight: '600', color: '#c9a45c' }}>
                       {bill.bill_number}
                     </td>
                     <td style={styles.td}>{bill.bill_date}</td>

@@ -345,18 +345,18 @@ function Scheme() {
 
         {/* Customer Hero Card */}
         <div style={{
-          background    : 'linear-gradient(135deg, #1a1a2e 0%, #2d2d5e 100%)',
+          background    : 'linear-gradient(135deg, #1d1812 0%, #3a2d16 100%)',
           borderRadius  : '20px',
           padding       : '24px',
           marginBottom  : '16px',
-          boxShadow     : '0 8px 32px rgba(26,26,46,0.3)',
+          boxShadow     : '0 8px 32px rgba(29,24,18,0.3)',
           position      : 'relative',
           overflow      : 'hidden'
         }}>
           <div style={{
             position: 'absolute', top: '-20px', right: '-20px',
             width: '100px', height: '100px', borderRadius: '50%',
-            backgroundColor: 'rgba(245,158,11,0.1)'
+            backgroundColor: 'rgba(201,164,92,0.1)'
           }} />
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
@@ -389,7 +389,7 @@ function Scheme() {
             padding        : '14px 16px'
           }}>
             <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)', marginBottom: '4px' }}>Plan</p>
-            <p style={{ fontSize: '16px', fontWeight: '700', color: '#f59e0b' }}>
+            <p style={{ fontSize: '16px', fontWeight: '700', color: '#c9a45c' }}>
               {plan?.plan_name}
             </p>
             <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', marginTop: '2px' }}>
@@ -424,7 +424,7 @@ function Scheme() {
             <p style={{ fontSize: '12px', color: theme.textSecondary, fontWeight: '600' }}>
               Amount Paid
             </p>
-            <p style={{ fontSize: '22px', fontWeight: '800', color: '#f59e0b', marginTop: '4px' }}>
+            <p style={{ fontSize: '22px', fontWeight: '800', color: '#c9a45c', marginTop: '4px' }}>
               {formatCurrency(totalPaid)}
             </p>
             <p style={{ fontSize: '11px', color: theme.textSecondary, marginTop: '4px' }}>
@@ -444,7 +444,7 @@ function Scheme() {
             <p style={{ fontSize: '13px', fontWeight: '600', color: theme.textPrimary }}>
               Scheme Progress
             </p>
-            <p style={{ fontSize: '13px', fontWeight: '700', color: '#f59e0b' }}>
+            <p style={{ fontSize: '13px', fontWeight: '700', color: '#c9a45c' }}>
               {Math.round((monthsPaid / totalMonths) * 100)}%
             </p>
           </div>
@@ -455,7 +455,7 @@ function Scheme() {
             <div style={{
               height        : '100%',
               width         : `${Math.min((monthsPaid / totalMonths) * 100, 100)}%`,
-              background    : 'linear-gradient(90deg, #f59e0b, #10b981)',
+              background    : 'linear-gradient(90deg, #c9a45c, #10b981)',
               borderRadius  : '4px',
               transition    : 'width 0.5s ease'
             }} />
@@ -501,7 +501,7 @@ function Scheme() {
               justifyContent : 'center',
               fontSize       : '10px',
               fontWeight     : '700',
-              backgroundColor: selectedCustomer.status === 'completed' ? '#f59e0b' : theme.headerBg,
+              backgroundColor: selectedCustomer.status === 'completed' ? '#c9a45c' : theme.headerBg,
               color          : selectedCustomer.status === 'completed' ? 'white' : theme.textSecondary,
               border         : `1px solid ${theme.border}`
             }}>
@@ -576,10 +576,10 @@ function Scheme() {
               <button
                 onClick={() => setShowPaymentForm(true)}
                 style={{
-                  backgroundColor: '#f59e0b', color: 'white', border: 'none',
+                  backgroundColor: '#c9a45c', color: 'white', border: 'none',
                   padding: '14px', borderRadius: '12px', fontSize: '15px',
                   fontWeight: '700', cursor: 'pointer',
-                  boxShadow: '0 4px 12px rgba(245,158,11,0.3)'
+                  boxShadow: '0 4px 12px rgba(201,164,92,0.3)'
                 }}
               >
                 Record Payment
@@ -748,10 +748,10 @@ function Scheme() {
         <button
           onClick={() => activeTab === 'plans' ? setShowPlanForm(true) : setShowCustomerForm(true)}
           style={{
-            backgroundColor: '#1a1a2e', color: 'white', border: 'none',
+            backgroundColor: '#1d1812', color: 'white', border: 'none',
             padding: '10px 18px', borderRadius: '12px', fontSize: '13px',
             fontWeight: '700', cursor: 'pointer',
-            boxShadow: '0 4px 12px rgba(26,26,46,0.3)'
+            boxShadow: '0 4px 12px rgba(29,24,18,0.3)'
           }}
         >
           + Add {activeTab === 'plans' ? 'Plan' : 'Customer'}
@@ -778,7 +778,7 @@ function Scheme() {
               padding: '10px 20px', border: 'none', background: 'none',
               fontSize: '14px', fontWeight: '600', cursor: 'pointer',
               color       : activeTab === tab.key ? theme.textPrimary : theme.textSecondary,
-              borderBottom: activeTab === tab.key ? '2px solid #f59e0b' : '2px solid transparent',
+              borderBottom: activeTab === tab.key ? '2px solid #c9a45c' : '2px solid transparent',
               marginBottom: '-2px'
             }}
           >
@@ -850,7 +850,7 @@ function Scheme() {
                       borderRadius: '12px', padding: '12px 14px',
                       border: '1px solid #fef08a'
                     }}>
-                      <p style={{ fontSize: '13px', color: '#f59e0b', fontWeight: '600' }}>
+                      <p style={{ fontSize: '13px', color: '#c9a45c', fontWeight: '600' }}>
                         Bonus Amount = {formatCurrency(parseFloat(planForm.monthly_amount) || 0)}
                         <span style={{ fontSize: '11px', color: theme.textSecondary, marginLeft: '6px' }}>
                           (= 1 month amount)
@@ -891,7 +891,7 @@ function Scheme() {
                     onClick={editPlan ? handleUpdatePlan : handleAddPlan}
                     style={{
                       flex: 1, padding: '14px', borderRadius: '12px', border: 'none',
-                      backgroundColor: '#1a1a2e', color: 'white',
+                      backgroundColor: '#1d1812', color: 'white',
                       fontSize: '15px', fontWeight: '700', cursor: 'pointer'
                     }}
                   >
@@ -947,7 +947,7 @@ function Scheme() {
                       )}
                     </div>
                     <div style={{
-                      backgroundColor: '#fef3c7', color: '#f59e0b',
+                      backgroundColor: '#fef3c7', color: '#c9a45c',
                       padding: '4px 10px', borderRadius: '20px',
                       fontSize: '12px', fontWeight: '700'
                     }}>
@@ -958,7 +958,7 @@ function Scheme() {
                   <div style={{ display: 'flex', gap: '16px', marginBottom: '14px' }}>
                     <div>
                       <p style={{ fontSize: '11px', color: theme.textSecondary }}>Monthly</p>
-                      <p style={{ fontSize: '18px', fontWeight: '800', color: '#f59e0b' }}>
+                      <p style={{ fontSize: '18px', fontWeight: '800', color: '#c9a45c' }}>
                         {formatCurrency(plan.monthly_amount)}
                       </p>
                     </div>
@@ -1121,7 +1121,7 @@ function Scheme() {
                     onClick={handleAddCustomer}
                     style={{
                       flex: 1, padding: '14px', borderRadius: '12px', border: 'none',
-                      backgroundColor: '#1a1a2e', color: 'white',
+                      backgroundColor: '#1d1812', color: 'white',
                       fontSize: '15px', fontWeight: '700', cursor: 'pointer'
                     }}
                   >
@@ -1192,7 +1192,7 @@ function Scheme() {
                       }}>
                         {customer.status}
                       </span>
-                      <p style={{ fontSize: '12px', color: '#f59e0b', fontWeight: '600' }}>
+                      <p style={{ fontSize: '12px', color: '#c9a45c', fontWeight: '600' }}>
                         {formatCurrency(customer.scheme_plans?.monthly_amount)}/mo
                       </p>
                     </div>
@@ -1234,7 +1234,7 @@ function Scheme() {
                 onClick={handleSearch}
                 disabled={searching}
                 style={{
-                  backgroundColor: '#1a1a2e', color: 'white', border: 'none',
+                  backgroundColor: '#1d1812', color: 'white', border: 'none',
                   padding: '12px 20px', borderRadius: '12px', fontSize: '14px',
                   fontWeight: '700', cursor: 'pointer'
                 }}
@@ -1275,7 +1275,7 @@ function Scheme() {
                           <p style={{ fontSize: '12px', color: theme.textSecondary, marginTop: '2px' }}>
                             {customer.phone || '—'}
                           </p>
-                          <p style={{ fontSize: '12px', color: '#f59e0b', fontWeight: '600', marginTop: '4px' }}>
+                          <p style={{ fontSize: '12px', color: '#c9a45c', fontWeight: '600', marginTop: '4px' }}>
                             {customer.scheme_plans?.plan_name}
                           </p>
                         </div>

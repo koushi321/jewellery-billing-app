@@ -2,11 +2,20 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate }         from 'react-router-dom'
 import CameraScanner           from '../components/CameraScanner'
 import { downloadBackup, getBackupStatus } from '../utils/backup'
+import { Coins, Sparkles, Scale } from 'lucide-react'
+import '../styles/shine.css'
 import { supabase }            from '../supabase'
 import { useTheme }            from '../context/ThemeContext'
 import { getTheme }            from '../context/theme'
 import useIsMobile             from '../hooks/useIsMobile'
 import useResponsiveGrid       from '../hooks/useResponsiveGrid'
+
+// Small icon for a sale / stat tile
+function CategoryIcon({ category }) {
+  if (category === 'Gold')    return <Coins size={17} strokeWidth={1.8} color="#c9a45c" />
+  if (category === 'Pattilu') return <Sparkles size={17} strokeWidth={1.8} color="#8b5cf6" />
+  return <Coins size={17} strokeWidth={1.8} color="#94a3b8" />
+}
 
 function Dashboard() {
   const today = new Date().toISOString().split('T')[0]
@@ -285,7 +294,7 @@ bills.forEach(bill => {
               padding        : '11px 18px',
               borderRadius   : '8px',
               border         : 'none',
-              backgroundColor: '#f59e0b',
+              backgroundColor: '#c9a45c',
               color          : 'white',
               fontSize       : '14px',
               fontWeight     : '700',
@@ -303,13 +312,13 @@ bills.forEach(bill => {
         borderRadius   : '16px',
         padding        : isMobile ? '14px' : '18px 22px',
         marginBottom   : '20px',
-        border         : `1px solid ${backupOverdue ? '#f59e0b' : theme.border}`,
+        border         : `1px solid ${backupOverdue ? '#c9a45c' : theme.border}`,
         boxShadow      : theme.shadowSm
       }}>
         <div style={{ fontSize: '15px', fontWeight: '700', color: theme.textPrimary, marginBottom: '4px' }}>
           Data backup
         </div>
-        <div style={{ fontSize: '13px', color: backupOverdue ? '#d97706' : theme.textSecondary, marginBottom: '12px', fontWeight: backupOverdue ? '600' : '400' }}>
+        <div style={{ fontSize: '13px', color: backupOverdue ? '#a8823a' : theme.textSecondary, marginBottom: '12px', fontWeight: backupOverdue ? '600' : '400' }}>
           {backupText}{backupOverdue ? ' Download a backup now (do this once a week).' : ''}
         </div>
         <button
@@ -319,7 +328,7 @@ bills.forEach(bill => {
             padding        : '11px 18px',
             borderRadius   : '8px',
             border         : 'none',
-            backgroundColor: '#f59e0b',
+            backgroundColor: '#c9a45c',
             color          : 'white',
             fontSize       : '14px',
             fontWeight     : '700',
@@ -379,47 +388,48 @@ bills.forEach(bill => {
         <>
           {/* ── Revenue Hero Card ── */}
           <div style={{
-            background  : 'linear-gradient(135deg, #1a1a2e 0%, #2d2d5e 100%)',
+            background  : 'linear-gradient(135deg, #1d1812 0%, #3a2d16 100%)',
             borderRadius: '20px',
             padding     : '24px',
             marginBottom: '16px',
-            boxShadow   : '0 8px 32px rgba(26,26,46,0.3)',
+            boxShadow   : '0 12px 36px rgba(0,0,0,0.35)',
+            border      : '1px solid rgba(201,164,92,0.35)',
             position    : 'relative',
             overflow    : 'hidden'
           }}>
             <div style={{
               position       : 'absolute', top: '-20px', right: '-20px',
               width          : '120px', height: '120px', borderRadius: '50%',
-              backgroundColor: 'rgba(245,158,11,0.1)'
+              backgroundColor: 'rgba(201,164,92,0.1)'
             }} />
             <div style={{
               position       : 'absolute', bottom: '-30px', right: '40px',
               width          : '80px', height: '80px', borderRadius: '50%',
-              backgroundColor: 'rgba(245,158,11,0.05)'
+              backgroundColor: 'rgba(201,164,92,0.05)'
             }} />
             <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)', fontWeight: '500', marginBottom: '6px' }}>
               Total Revenue
             </p>
-            <p style={{
-              fontSize     : isMobile ? '32px' : '40px',
-              fontWeight   : '800',
-              color        : '#ffffff',
+            <p className="pj-shine pj-shine-static" style={{
+              fontSize     : isMobile ? '34px' : '46px',
+              fontWeight   : '700',
+              fontFamily   : "'Playfair Display', Georgia, serif",
               marginBottom : '16px',
-              letterSpacing: '-1px'
+              display      : 'inline-block'
             }}>
               {formatCurrency(data.summary.totalRevenue)}
             </p>
             <div style={{ display: 'flex', gap: '16px' }}>
               <div>
                 <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>Bills</p>
-                <p style={{ fontSize: '16px', fontWeight: '700', color: '#f59e0b' }}>
+                <p style={{ fontSize: '16px', fontWeight: '700', color: '#c9a45c' }}>
                   {data.summary.totalBills}
                 </p>
               </div>
               <div style={{ width: '1px', backgroundColor: 'rgba(255,255,255,0.1)' }} />
               <div>
                 <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>Items Sold</p>
-                <p style={{ fontSize: '16px', fontWeight: '700', color: '#f59e0b' }}>
+                <p style={{ fontSize: '16px', fontWeight: '700', color: '#c9a45c' }}>
                   {data.sales.length}
                 </p>
               </div>
@@ -429,7 +439,7 @@ bills.forEach(bill => {
           {/* ── Stat Cards Grid ── */}
           <div style={{ ...grids.grid2, marginBottom: '16px' }}>
 
-            <div style={{
+            <div className="app-card" style={{
               backgroundColor: theme.cardBg, borderRadius: '16px',
               padding: '16px', boxShadow: theme.shadowSm, border: `1px solid ${theme.border}`
             }}>
@@ -437,16 +447,16 @@ bills.forEach(bill => {
                 <p style={{ fontSize: '12px', color: theme.textSecondary, fontWeight: '600' }}>Gold Sold</p>
                 <div style={{
                   width: '28px', height: '28px', borderRadius: '8px',
-                  backgroundColor: '#fef3c7',
+                  backgroundColor: isDark ? 'rgba(201,164,92,0.18)' : '#fef3c7',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px'
-                }}>🥇</div>
+                }}><CategoryIcon category="Gold" /></div>
               </div>
-              <p style={{ fontSize: '22px', fontWeight: '800', color: '#f59e0b', marginTop: '8px' }}>
+              <p style={{ fontSize: '22px', fontWeight: '800', color: '#c9a45c', marginTop: '8px' }}>
                 {data.summary.goldWeight.toFixed(2)}g
               </p>
             </div>
 
-            <div style={{
+            <div className="app-card" style={{
               backgroundColor: theme.cardBg, borderRadius: '16px',
               padding: '16px', boxShadow: theme.shadowSm, border: `1px solid ${theme.border}`
             }}>
@@ -454,16 +464,16 @@ bills.forEach(bill => {
                 <p style={{ fontSize: '12px', color: theme.textSecondary, fontWeight: '600' }}>Silver Sold</p>
                 <div style={{
                   width: '28px', height: '28px', borderRadius: '8px',
-                  backgroundColor: '#f1f5f9',
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : '#f1f5f9',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px'
-                }}>🥈</div>
+                }}><CategoryIcon category="Silver" /></div>
               </div>
               <p style={{ fontSize: '22px', fontWeight: '800', color: '#64748b', marginTop: '8px' }}>
                 {data.summary.silverWeight.toFixed(2)}g
               </p>
             </div>
 
-            <div style={{
+            <div className="app-card" style={{
               backgroundColor: theme.cardBg, borderRadius: '16px',
               padding: '16px', boxShadow: theme.shadowSm, border: `1px solid ${theme.border}`
             }}>
@@ -471,16 +481,16 @@ bills.forEach(bill => {
                 <p style={{ fontSize: '12px', color: theme.textSecondary, fontWeight: '600' }}>Pattilu Sold</p>
                 <div style={{
                   width: '28px', height: '28px', borderRadius: '8px',
-                  backgroundColor: '#ede9fe',
+                  backgroundColor: isDark ? 'rgba(139,92,246,0.2)' : '#ede9fe',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px'
-                }}>💫</div>
+                }}><CategoryIcon category="Pattilu" /></div>
               </div>
               <p style={{ fontSize: '22px', fontWeight: '800', color: '#8b5cf6', marginTop: '8px' }}>
                 {data.summary.pattiluWeight.toFixed(2)}g
               </p>
             </div>
 
-            <div style={{
+            <div className="app-card" style={{
               backgroundColor: theme.cardBg, borderRadius: '16px',
               padding: '16px', boxShadow: theme.shadowSm, border: `1px solid ${theme.border}`
             }}>
@@ -489,9 +499,12 @@ bills.forEach(bill => {
                 <div style={{
                   width: '28px', height: '28px', borderRadius: '8px',
                   backgroundColor: data.summary.pattiluChecked === 0
-                    ? '#f1f5f9' : data.summary.pattiluAllMatch ? '#d1fae5' : '#fee2e2',
+                    ? (isDark ? 'rgba(255,255,255,0.08)' : '#f1f5f9')
+                    : data.summary.pattiluAllMatch
+                      ? (isDark ? 'rgba(16,185,129,0.2)' : '#d1fae5')
+                      : (isDark ? 'rgba(239,68,68,0.2)' : '#fee2e2'),
                   display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px'
-                }}>⚖️</div>
+                }}><Scale size={17} strokeWidth={1.8} color={data.summary.pattiluChecked === 0 ? '#94a3b8' : data.summary.pattiluAllMatch ? '#10b981' : '#ef4444'} /></div>
               </div>
               <p style={{
                 fontSize: '18px', fontWeight: '800', marginTop: '8px',
@@ -509,7 +522,7 @@ bills.forEach(bill => {
 
           {/* ── Old Gold/Silver Received ── */}
           {(data.summary.oldGoldWeight > 0 || data.summary.oldSilverWeight > 0) && (
-            <div style={{
+            <div className="app-card" style={{
               backgroundColor: theme.cardBg, borderRadius: '16px',
               padding: '16px', marginBottom: '16px',
               boxShadow: theme.shadowSm, border: `1px solid ${theme.border}`
@@ -521,7 +534,7 @@ bills.forEach(bill => {
                 {data.summary.oldGoldWeight > 0 && (
                   <div>
                     <p style={{ fontSize: '11px', color: theme.textSecondary }}>Old Gold</p>
-                    <p style={{ fontSize: '18px', fontWeight: '700', color: '#f59e0b' }}>
+                    <p style={{ fontSize: '18px', fontWeight: '700', color: '#c9a45c' }}>
                       {data.summary.oldGoldWeight.toFixed(2)}g
                     </p>
                   </div>
@@ -544,7 +557,7 @@ bills.forEach(bill => {
               Bills — {data.bills.length} total
             </p>
             {data.bills.length === 0 ? (
-              <div style={{
+              <div className="app-card" style={{
                 backgroundColor: theme.cardBg, borderRadius: '16px',
                 padding: '32px', textAlign: 'center', border: `1px solid ${theme.border}`
               }}>
@@ -559,14 +572,14 @@ bills.forEach(bill => {
          : bill.items_json
           const items = Array.isArray(parsed) ? parsed : parsed.items || []
                   return (
-                    <div key={bill.id} style={{
+                    <div key={bill.id} className="app-card" style={{
                       backgroundColor: theme.cardBg, borderRadius: '16px',
                       padding: '16px', boxShadow: theme.shadowSm,
                       border: `1px solid ${theme.border}`,
                       display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                     }}>
                       <div>
-                        <p style={{ fontSize: '13px', fontWeight: '700', color: '#f59e0b' }}>
+                        <p style={{ fontSize: '13px', fontWeight: '700', color: '#c9a45c' }}>
                           {bill.bill_number}
                         </p>
                         <p style={{ fontSize: '14px', fontWeight: '600', color: theme.textPrimary, marginTop: '2px' }}>
@@ -601,7 +614,7 @@ bills.forEach(bill => {
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {data.sales.map((sale) => (
-                  <div key={sale.id} style={{
+                  <div key={sale.id} className="app-card" style={{
                     backgroundColor: theme.cardBg, borderRadius: '14px',
                     padding: '14px 16px', border: `1px solid ${theme.border}`,
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center'
@@ -609,11 +622,12 @@ bills.forEach(bill => {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <div style={{
                         width: '36px', height: '36px', borderRadius: '10px',
-                        backgroundColor: sale.category === 'Gold' ? '#fef3c7'
-                          : sale.category === 'Pattilu' ? '#ede9fe' : '#f1f5f9',
+                        backgroundColor: sale.category === 'Gold' ? (isDark ? 'rgba(201,164,92,0.18)' : '#fef3c7')
+                          : sale.category === 'Pattilu' ? (isDark ? 'rgba(139,92,246,0.2)' : '#ede9fe')
+                          : (isDark ? 'rgba(255,255,255,0.08)' : '#f1f5f9'),
                         display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px'
                       }}>
-                        {sale.category === 'Gold' ? '🥇' : sale.category === 'Pattilu' ? '💫' : '🥈'}
+                        <CategoryIcon category={sale.category} />
                       </div>
                       <div>
                         <p style={{ fontSize: '14px', fontWeight: '600', color: theme.textPrimary }}>

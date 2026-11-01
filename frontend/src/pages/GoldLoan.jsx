@@ -366,11 +366,11 @@ function GoldLoan() {
     fontWeight   : '600',
     color        : theme.textPrimary,
     cursor       : 'pointer',
-    borderBottom : '2px solid #f59e0b',
+    borderBottom : '2px solid #c9a45c',
     marginBottom : '-2px'
   },
   addButton: {
-    backgroundColor: '#1a1a2e',
+    backgroundColor: '#1d1812',
     color          : 'white',
     border         : 'none',
     padding        : '10px 20px',
@@ -448,9 +448,9 @@ function GoldLoan() {
     cursor         : 'pointer'
   },
   filterBtnActive: {
-    backgroundColor: '#1a1a2e',
+    backgroundColor: '#1d1812',
     color          : 'white',
-    border         : '1px solid #1a1a2e',
+    border         : '1px solid #1d1812',
     padding        : '8px 16px',
     borderRadius   : '8px',
     fontSize       : '13px',
@@ -497,7 +497,7 @@ function GoldLoan() {
     fontWeight   : '600'
   },
   viewButton: {
-    backgroundColor: '#1a1a2e',
+    backgroundColor: '#1d1812',
     color          : 'white',
     border         : 'none',
     padding        : '8px 16px',
@@ -542,7 +542,7 @@ function GoldLoan() {
   },
   itemChip: {
     fontSize        : '12px',
-    backgroundColor : isDark ? '#2a2d3e' : '#f1f5f9',
+    backgroundColor : isDark ? '#2b251a' : '#f1f5f9',
     color           : theme.textPrimary,
     padding         : '2px 8px',
     borderRadius    : '4px',
@@ -578,7 +578,7 @@ function GoldLoan() {
     color          : theme.textPrimary
   },
   searchButton: {
-    backgroundColor: '#1a1a2e',
+    backgroundColor: '#1d1812',
     color          : 'white',
     border         : 'none',
     padding        : '12px 24px',
@@ -744,7 +744,7 @@ function GoldLoan() {
     display        : 'flex',
     justifyContent : 'space-between',
     alignItems     : 'center',
-    backgroundColor: '#1a1a2e',
+    backgroundColor: '#1d1812',
     borderRadius   : '10px',
     padding        : '16px 24px',
     marginTop      : '16px'
@@ -757,7 +757,7 @@ function GoldLoan() {
   totalDueValue: {
     fontSize  : '24px',
     fontWeight: '800',
-    color     : '#f59e0b'
+    color     : '#c9a45c'
   },
   actionButtons: {
     display     : 'flex',
@@ -766,7 +766,7 @@ function GoldLoan() {
     marginBottom: '24px'
   },
   paymentButton: {
-    backgroundColor: '#f59e0b',
+    backgroundColor: '#c9a45c',
     color          : 'white',
     border         : 'none',
     padding        : '10px 20px',
@@ -786,7 +786,7 @@ function GoldLoan() {
     cursor         : 'pointer'
   },
   printButton: {
-    backgroundColor: '#1a1a2e',
+    backgroundColor: '#1d1812',
     color          : 'white',
     border         : 'none',
     padding        : '10px 20px',
@@ -963,7 +963,7 @@ function GoldLoan() {
             </div>
             <div style={styles.calcCard}>
               <p style={styles.calcLabel}>Interest Amount</p>
-              <p style={{ ...styles.calcValue, color: '#f59e0b' }}>
+              <p style={{ ...styles.calcValue, color: '#c9a45c' }}>
                 {formatCurrency(calculation.interest)}
               </p>
             </div>
@@ -981,7 +981,7 @@ function GoldLoan() {
               <span style={styles.finalAmountLabel}>
                 Interest ({loan.interest_rate}% × {calculation.months} months)
               </span>
-              <span style={{ ...styles.finalAmountValue, color: '#f59e0b' }}>
+              <span style={{ ...styles.finalAmountValue, color: '#c9a45c' }}>
                 + {formatCurrency(calculation.interest)}
               </span>
             </div>
@@ -1361,7 +1361,7 @@ function GoldLoan() {
                 <tbody>
                   {filteredLoans.map((loan) => (
                     <tr key={loan.id} style={styles.tableRow}>
-                      <td style={{ ...styles.td, fontWeight: '600', color: '#f59e0b' }}>
+                      <td style={{ ...styles.td, fontWeight: '600', color: '#c9a45c' }}>
                       {loan.person_id}
                         </td>
                       <td style={styles.td}>{loan.person_name}</td>
