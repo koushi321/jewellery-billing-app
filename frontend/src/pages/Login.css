@@ -8,6 +8,8 @@
   --line: rgba(201, 164, 92, 0.3);
 
   position: relative;
+  overflow: hidden;
+  background: #0a0908;
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -17,7 +19,12 @@
   color: var(--ivory);
 }
 
+.pjl-bg { position: absolute; inset: 0; transition: transform 1.8s cubic-bezier(0.2, 0.6, 0.2, 1); }
+.pjl:hover .pjl-bg { transform: scale(1.07); }
+.pjl:hover .pj-glow-layer { opacity: 1; }
+
 .pjl-back {
+  z-index: 2;
   position: absolute;
   top: 24px;
   left: clamp(18px, 5vw, 64px);
@@ -32,6 +39,9 @@
 .pjl-back:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
 
 .pjl-card {
+  position: relative;
+  z-index: 2;
+  transition: transform 0.4s, border-color 0.4s, box-shadow 0.4s;
   width: 100%;
   max-width: 420px;
   padding: 42px 36px 38px;
@@ -97,6 +107,17 @@
   border: 1px solid rgba(248, 113, 113, 0.4);
   color: #ff9d9d;
   font-size: 13px;
+}
+
+.pjl-back { transition: color 0.2s, letter-spacing 0.3s; }
+.pjl-input { transition: border-color 0.2s, box-shadow 0.2s, background 0.2s; }
+.pjl-button { transition: background 0.25s, border-color 0.25s, transform 0.25s, box-shadow 0.25s; }
+
+@media (hover: hover) {
+  .pjl-card:hover { transform: translateY(-4px); border-color: rgba(201, 164, 92, 0.6); box-shadow: 0 30px 70px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(201, 164, 92, 0.18); }
+  .pjl-back:hover { letter-spacing: 0.28em; }
+  .pjl-input:hover { border-color: rgba(201, 164, 92, 0.6); background: #12100c; }
+  .pjl-button:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(201, 164, 92, 0.28); }
 }
 
 @media (max-width: 480px) {

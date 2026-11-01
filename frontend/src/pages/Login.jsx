@@ -5,6 +5,7 @@ import '@fontsource/playfair-display/700.css'
 import '@fontsource/jost/400.css'
 import '@fontsource/jost/500.css'
 import { SHOP_NAME, HERO_BACKGROUND } from '../data/brand'
+import { spotlight } from '../utils/spotlight'
 import '../styles/shine.css'
 import './Login.css'
 
@@ -46,11 +47,18 @@ function Login() {
   }
 
   return (
-    <div className="pjl" style={{ background: HERO_BACKGROUND }}>
+    <div className="pjl" onMouseMove={spotlight}>
+      <div className="pjl-bg" style={{ background: HERO_BACKGROUND }} aria-hidden="true" />
+      <div className="pj-glow-layer" aria-hidden="true" />
       <Link className="pjl-back" to="/">← Back to home</Link>
 
       <div className="pjl-card">
-        <h1 className="pjl-title pj-shine">{SHOP_NAME}</h1>
+        <div className="pj-name-wrap">
+          <h1 className="pjl-title pj-shine">{SHOP_NAME}</h1>
+          <span className="pj-sparkle" aria-hidden="true" style={{ top: '-4%', left: '2%', '--s': '12px', '--d': '0s' }} />
+          <span className="pj-sparkle" aria-hidden="true" style={{ top: '10%', right: '0%', '--s': '14px', '--d': '1.5s' }} />
+          <span className="pj-sparkle" aria-hidden="true" style={{ bottom: '6%', left: '40%', '--s': '10px', '--d': '2.4s' }} />
+        </div>
         <div className="pjl-rule" aria-hidden="true" />
         <p className="pjl-subtitle">Sign in to manage your shop</p>
 

@@ -6,10 +6,21 @@ import '@fontsource/jost/400.css'
 import '@fontsource/jost/500.css'
 import { shopInfo } from '../data/shopInfo'
 import { SHOP_NAME, HERO_BACKGROUND } from '../data/brand'
+import { spotlight } from '../utils/spotlight'
 import '../styles/shine.css'
 import './Home.css'
 
 const onlyDigits = (value) => String(value || '').replace(/\D/g, '')
+
+// Small twinkling stars placed around the shop name
+const SPARKLES = [
+  { top: '4%',  left: '2%',   s: 16, d: '0s'   },
+  { top: '-6%', left: '48%',  s: 12, d: '1.2s' },
+  { top: '14%', right: '0%',  s: 18, d: '2.1s' },
+  { bottom: '34%', left: '-3%', s: 11, d: '2.8s' },
+  { bottom: '10%', right: '8%', s: 14, d: '0.7s' },
+  { bottom: '2%',  left: '18%', s: 12, d: '1.8s' }
+]
 
 // Shop name split into a big word and a small word for the logo
 function Logo({ name, light = false }) {
@@ -70,11 +81,23 @@ function Home() {
       </header>
 
       {/* ── Hero ── */}
-      <section id="top" className="pj-hero" style={{ background: HERO_BACKGROUND }}>
+      <section id="top" className="pj-hero" onMouseMove={spotlight}>
+        <div className="pj-hero-bg" style={{ background: HERO_BACKGROUND }} aria-hidden="true" />
+        <div className="pj-glow-layer" aria-hidden="true" />
         <div className="pj-frame" aria-hidden="true" />
         <div className="pj-hero-inner">
           <p className="pj-eyebrow">Family jewellers for {yearsNumber}+ years</p>
-          <h1 className="pj-hero-name pj-shine">{name}</h1>
+          <div className="pj-name-wrap">
+            <h1 className="pj-hero-name pj-shine">{name}</h1>
+            {SPARKLES.map((sp, i) => (
+              <span
+                key={i}
+                className="pj-sparkle"
+                aria-hidden="true"
+                style={{ top: sp.top, bottom: sp.bottom, left: sp.left, right: sp.right, '--s': `${sp.s}px`, '--d': sp.d }}
+              />
+            ))}
+          </div>
           <div className="pj-rule" aria-hidden="true" />
           <p className="pj-tagline">{tagline}</p>
           <div className="pj-actions">
@@ -105,6 +128,7 @@ function Home() {
       </section>
 
       {/* ── About ── */}
+      <div className="pj-spot" onMouseMove={spotlight}>
       <section id="about" className="pj-section pj-about">
         <div className="pj-label">About us</div>
         <h2 className="pj-h2">A family jeweller you can trust</h2>
@@ -114,10 +138,11 @@ function Home() {
           every customer the way we did on the first day.
         </p>
       </section>
+      </div>
 
       {/* ── Collections ── */}
       {offerings.length > 0 && (
-        <section id="collections" className="pj-band">
+        <section id="collections" className="pj-band pj-spot" onMouseMove={spotlight}>
           <div className="pj-section">
             <div className="pj-label">Collections</div>
             <h2 className="pj-h2">What we offer</h2>
@@ -136,6 +161,7 @@ function Home() {
 
       {/* ── Visit us ── */}
       {hasVisit && (
+        <div className="pj-spot" onMouseMove={spotlight}>
         <section id="visit" className="pj-section pj-visit">
           <div className="pj-label">Visit us</div>
           <h2 className="pj-h2">Visit our shop</h2>
@@ -192,6 +218,7 @@ function Home() {
             )}
           </div>
         </section>
+        </div>
       )}
 
       {/* ── Footer ── */}

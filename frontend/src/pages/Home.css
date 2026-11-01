@@ -60,12 +60,15 @@
 
 /* ── Hero ── */
 .pj-hero {
-  position: relative; min-height: 100vh; min-height: 100svh;
+  position: relative; overflow: hidden; background: var(--black); min-height: 100vh; min-height: 100svh;
   display: flex; align-items: center; justify-content: center; text-align: center;
   padding: 130px 24px 100px;
 }
-.pj-frame { position: absolute; inset: 86px clamp(14px, 3vw, 40px) clamp(14px, 3vw, 40px); border: 1px solid var(--line); pointer-events: none; }
-.pj-hero-inner { position: relative; max-width: 900px; animation: pj-fade 0.9s ease both; }
+.pj-hero-bg { position: absolute; inset: 0; transition: transform 1.8s cubic-bezier(0.2, 0.6, 0.2, 1); }
+.pj-hero:hover .pj-hero-bg { transform: scale(1.07); }
+.pj-hero:hover .pj-glow-layer { opacity: 1; }
+.pj-frame { z-index: 1; position: absolute; inset: 86px clamp(14px, 3vw, 40px) clamp(14px, 3vw, 40px); border: 1px solid var(--line); pointer-events: none; }
+.pj-hero-inner { position: relative; z-index: 2; max-width: 900px; animation: pj-fade 0.9s ease both; }
 .pj-eyebrow { color: var(--gold); font-size: 13px; font-weight: 500; letter-spacing: 0.38em; text-transform: uppercase; margin-bottom: 26px; }
 .pj-hero-name { font-size: clamp(44px, 8.4vw, 104px); line-height: 1.06; text-wrap: balance; padding-bottom: 0.08em; }
 .pj-rule { width: 64px; height: 1px; background: var(--gold); margin: 32px auto 26px; }
@@ -122,6 +125,30 @@
 .pj-footer-line { margin-top: 22px; font-size: 14px; }
 .pj-footer-login { display: inline-block; margin-top: 16px; font-size: 12px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--gold); }
 .pj-footer-login:hover { color: var(--gold-light); }
+
+/* ── Hover effects (only on devices that really hover) ── */
+.pj-logo { transition: transform 0.35s, filter 0.35s; }
+.pj-btn, .pj-login { transition: background 0.25s, color 0.25s, border-color 0.25s, transform 0.25s, box-shadow 0.25s; }
+.pj-fact, .pj-fact-big, .pj-card-no, .pj-info-row, .pj-map { transition: background 0.3s, transform 0.35s, padding 0.3s, filter 0.4s; }
+.pj-nav a::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: var(--gold); transform: scaleX(0); transform-origin: left; transition: transform 0.3s; }
+.pj-card { position: relative; overflow: hidden; }
+.pj-card::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: var(--gold); transform: scaleX(0); transform-origin: left; transition: transform 0.4s; }
+.pj-footer-login { transition: color 0.2s, letter-spacing 0.3s; }
+
+@media (hover: hover) {
+  .pj-logo-link:hover .pj-logo { transform: scale(1.06); filter: brightness(1.15); }
+  .pj-nav a:hover::after { transform: scaleX(1); }
+  .pj-login:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(201,164,92,0.25); }
+  .pj-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(201,164,92,0.28); }
+  .pj-fact:hover { background: rgba(201,164,92,0.08); }
+  .pj-fact:hover .pj-fact-big { transform: scale(1.1); }
+  .pj-card:hover { transform: translateY(-9px); background: #1c1813; box-shadow: 0 20px 44px rgba(0,0,0,0.55); }
+  .pj-card:hover::before { transform: scaleX(1); }
+  .pj-card:hover .pj-card-no { transform: scale(1.25); transform-origin: left center; }
+  .pj-info-row:hover { background: rgba(201,164,92,0.07); padding-left: 12px; padding-right: 12px; }
+  .pj-map:hover { filter: none; }
+  .pj-footer-login:hover { letter-spacing: 0.34em; }
+}
 
 @keyframes pj-fade { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .pj-hero-inner { animation: none; } .pj-card, .pj-header { transition: none; } }
